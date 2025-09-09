@@ -1,11 +1,15 @@
-﻿namespace CareerSpark.DataAccessLayer.UnitOfWork
+﻿using CareerSpark.DataAccessLayer.Interfaces;
+
+namespace CareerSpark.DataAccessLayer.UnitOfWork
 {
     public interface IUnitOfWork : IAsyncDisposable
     {
         // Repository access
         IUserRepository UserRepository { get; }
         IRoleRepository RoleRepository { get; }
-        ITestRepository TestRepository { get; }
+        IQuestionTestRepository QuestionTestRepository { get; }
+        ITestAnswerRepository TestAnswerRepository { get; }
+        ITestHistoryRepository TestHistoryRepository { get; }
         // Transaction management
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

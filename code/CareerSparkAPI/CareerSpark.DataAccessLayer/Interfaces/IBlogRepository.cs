@@ -2,7 +2,7 @@
 
 namespace CareerSpark.DataAccessLayer.Interfaces
 {
-    public interface ITestAnswerRepository : IGenericRepository<TestAnswer>
+    public interface IBlogRepository : IGenericRepository<Blog>
     {
     }
 }

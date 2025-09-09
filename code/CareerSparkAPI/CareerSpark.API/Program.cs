@@ -1,4 +1,6 @@
 
+using CareerSpark.BusinessLayer.Interfaces;
+using CareerSpark.BusinessLayer.Services;
 using CareerSpark.DataAccessLayer.Context;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -66,6 +68,8 @@ namespace CareerSpark.API
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 
             builder.Services.AddCors(options =>
@@ -92,6 +96,8 @@ namespace CareerSpark.API
                         ValidAudience = builder.Configuration["JwtSettings:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
                     };
+                    // map "Role" claim về role cho ASP.NET Core
+                    options.TokenValidationParameters.RoleClaimType = "Role";
                 });
             //ReferenceHandler.IgnoreCycles bảo serializer bỏ qua vòng lặp, không bị crash nữa.
             //Nó sẽ bỏ qua property lặp lại, thay vì serialize vô hạn.

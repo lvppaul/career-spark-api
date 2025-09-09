@@ -1,6 +1,8 @@
-﻿namespace CareerSpark.DataAccessLayer.Interfaces
+﻿using CareerSpark.DataAccessLayer.Entities;
+
+namespace CareerSpark.DataAccessLayer.Interfaces
 {
-    public interface ITestHistoryRepository
+    public interface ITestHistoryRepository : IGenericRepository<TestHistory>
     {
     }
 }

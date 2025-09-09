@@ -1,6 +1,8 @@
-﻿namespace CareerSpark.DataAccessLayer.Interfaces
+﻿using CareerSpark.DataAccessLayer.Entities;
+
+namespace CareerSpark.DataAccessLayer.Interfaces
 {
-    public interface IQuestionTestRepository
+    public interface IQuestionTestRepository : IGenericRepository<QuestionTest>
     {
     }
 }
