@@ -1,4 +1,5 @@
 ﻿using CareerSpark.DataAccessLayer.Context;
+using CareerSpark.DataAccessLayer.Helper;
 using CareerSpark.DataAccessLayer.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,6 +57,20 @@ namespace CareerSpark.DataAccessLayer.Repositories
         public virtual async Task<List<T>> GetAllAsync()
         {
             return await _context.Set<T>().ToListAsync();
+        }
+
+        public virtual async Task<PaginatedResult<T>> GetAllAsyncWithPagination(Pagination pagination)
+        {
+            // Get total count
+            var totalCount = await _context.Set<T>().CountAsync();
+
+            // Get paginated items
+            var items = await _context.Set<T>()
+                .Skip(pagination.Skip)
+                .Take(pagination.Take)
+                .ToListAsync();
+
+            return new PaginatedResult<T>(items, totalCount, pagination.PageNumber, pagination.PageSize);
         }
 
         public virtual async Task<int> CreateAsync(T entity)

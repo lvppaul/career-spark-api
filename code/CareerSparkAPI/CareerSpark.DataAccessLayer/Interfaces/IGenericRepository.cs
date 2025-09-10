@@ -1,4 +1,6 @@
-﻿namespace CareerSpark.DataAccessLayer.Interfaces
+﻿using CareerSpark.DataAccessLayer.Helper;
+
+namespace CareerSpark.DataAccessLayer.Interfaces
 {
     public interface IGenericRepository<T> where T : class
     {
@@ -12,6 +14,7 @@
         T GetById(Guid code);
 
         Task<List<T>> GetAllAsync();
+        Task<PaginatedResult<T>> GetAllAsyncWithPagination(Pagination pagination);
         Task<int> CreateAsync(T entity);
         Task<int> UpdateAsync(T entity);
         Task<int> UpdateRangeAsync(IEnumerable<T> entities);
