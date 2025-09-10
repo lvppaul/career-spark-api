@@ -1,5 +1,6 @@
 ﻿using CareerSpark.DataAccessLayer.Context;
 using CareerSpark.DataAccessLayer.Entities;
+using CareerSpark.DataAccessLayer.Helper;
 using CareerSpark.DataAccessLayer.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
         }
 
-        public async Task SetActive(User user)
+        public async Task SetActiveOrDeactive(User user)
         {
             user.IsActive = !user.IsActive;
             await UpdateAsync(user);
@@ -29,6 +30,22 @@ namespace CareerSpark.DataAccessLayer.Repositories
             return await _context.Users
                 .Include(u => u.Role)
                 .ToListAsync();
+        }
+
+        public override async Task<PaginatedResult<User>> GetAllAsyncWithPagination(Pagination pagination)
+        {
+            // Get total count
+            var totalCount = await _context.Users.CountAsync();
+
+            // Get paginated items with Role included
+            var items = await _context.Users
+                .Include(u => u.Role)
+                .OrderBy(u => u.Id) // Thêm ordering để đảm bảo consistent pagination
+                .Skip(pagination.Skip)
+                .Take(pagination.Take)
+                .ToListAsync();
+
+            return new PaginatedResult<User>(items, totalCount, pagination.PageNumber, pagination.PageSize);
         }
 
         public async Task<User?> GetByEmailAsync(string email)
@@ -61,7 +78,12 @@ namespace CareerSpark.DataAccessLayer.Repositories
 
         public async Task<User> GetByPhoneAsync(string phone)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Phone == phone);
+            if (string.IsNullOrWhiteSpace(phone))
+                return null;
+
+            return await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Phone == phone);
         }
     }
 }
