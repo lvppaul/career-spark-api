@@ -79,7 +79,7 @@ namespace CareerSpark.API.Controllers
             return Ok(result);
         }
 
-        // Logout thường nghĩa là xóa refresh token của user trong DB
+        // Logout thường nghĩa là xóa refreshtoken và refreshTokenAt của user trong DB
         [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout(LogoutRequest request)

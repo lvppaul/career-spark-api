@@ -105,6 +105,7 @@ namespace CareerSpark.BusinessLayer.Services
             }
         }
 
+        // Đăng nhập và trả về access token và refresh token
         public async Task<AuthenticationResponse?> LoginAsync(LoginRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
@@ -181,6 +182,7 @@ namespace CareerSpark.BusinessLayer.Services
             };
         }
 
+        // Làm mới access token bằng cách sử dụng refresh token
         public async Task<AuthenticationResponse?> RefreshTokenAsync(string refreshToken)
         {
             //refreshtoken trống
@@ -264,6 +266,7 @@ namespace CareerSpark.BusinessLayer.Services
 
         }
 
+        // Đăng ký tài khoản mới
         public async Task<AuthenticationResponse?> RegisterAsync(UserRequest request)
         {
             // Validate input Null or Empty
@@ -410,6 +413,8 @@ namespace CareerSpark.BusinessLayer.Services
                 };
             }
         }
+
+        // Logout thường nghĩa là xóa refreshtoken và refreshTokenAt của user trong DB
         public async Task<AuthenticationResponse?> LogoutAsync(LogoutRequest request)
         {
             // Validate input - ít nhất một trong hai token phải có
@@ -439,6 +444,7 @@ namespace CareerSpark.BusinessLayer.Services
                     var principal = await ValidateToken(request.AccessToken);
                     if (principal != null)
                     {
+                        // lấy ra ID user từ claim "sub"
                         var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
                         if (int.TryParse(userIdClaim, out int userId))
                         {

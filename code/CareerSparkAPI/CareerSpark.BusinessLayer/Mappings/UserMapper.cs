@@ -43,7 +43,7 @@ namespace CareerSpark.BusinessLayer.Mappings
         }
         #endregion
 
-        #region Request to Update Entity
+        #region Request to Updated Entity
         public static void ToUpdate(this UserUpdate request, User user)
         {
             if (request == null || user == null) return;
