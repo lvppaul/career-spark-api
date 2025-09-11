@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CareerSpark.DataAccessLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAttributeUser : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

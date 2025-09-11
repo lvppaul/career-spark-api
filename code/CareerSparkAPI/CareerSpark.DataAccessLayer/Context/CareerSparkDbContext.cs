@@ -55,6 +55,7 @@ public partial class CareerSparkDbContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Blog>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Blogs__3214EC075D1ED2B1");
