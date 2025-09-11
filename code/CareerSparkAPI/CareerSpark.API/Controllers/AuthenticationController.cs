@@ -61,19 +61,19 @@ namespace CareerSpark.API.Controllers
         {
             if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
             {
-                return BadRequest(new { message = "Refresh token is required" });
+                return BadRequest(new { Success = false, message = "Refresh token is required" });
             }
 
             var result = await _authenticationService.RefreshTokenAsync(request.RefreshToken);
 
             if (result == null)
             {
-                return StatusCode(500, new { message = "Internal server error" });
+                return StatusCode(500, new { Success = false, message = "Internal server error" });
             }
 
             if (!result.Success)
             {
-                return BadRequest(new { message = result.Message });
+                return BadRequest(new { Success = false, message = result.Message });
             }
 
             return Ok(result);
