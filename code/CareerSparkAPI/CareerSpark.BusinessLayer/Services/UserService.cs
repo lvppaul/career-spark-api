@@ -99,7 +99,32 @@ namespace CareerSpark.BusinessLayer.Services
             }
         }
 
-        public async Task<bool> SetActiveOrDeactive(int userId)
+        public async Task<bool> SetActive(int userId)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+            if (user == null)
+                return false;
+
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+                if (user.IsActive == true)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return true; // User đã active rồi, không cần làm gì thêm
+                }
+                await _unitOfWork.UserRepository.SetActive(user);
+                await _unitOfWork.CommitTransactionAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+        }
+
+        public async Task<bool> Deactive(int userId)
         {
             var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
             if (user == null)
@@ -124,7 +149,12 @@ namespace CareerSpark.BusinessLayer.Services
                         }
                     }
                 }
-                await _unitOfWork.UserRepository.SetActiveOrDeactive(user);
+                else
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return true; // User đã deactive rồi, không cần làm gì thêm
+                }
+                await _unitOfWork.UserRepository.DeActive(user);
                 await _unitOfWork.CommitTransactionAsync();
                 return true;
             }

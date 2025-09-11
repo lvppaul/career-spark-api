@@ -4,7 +4,8 @@ namespace CareerSpark.DataAccessLayer.Interfaces
 {
     public interface IUserRepository : IGenericRepository<User>
     {
-        Task SetActiveOrDeactive(User user);
+        Task SetActive(User user);
+        Task DeActive(User user);
         Task<User?> GetByEmailAsync(string email);
         Task<User?> GetByRefreshTokenAsync(string refreshToken);
         Task<bool> VerifyPasswordAsync(User user, string password);

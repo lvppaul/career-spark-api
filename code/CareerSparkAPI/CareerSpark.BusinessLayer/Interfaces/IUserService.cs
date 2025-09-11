@@ -12,7 +12,8 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<bool> GetUserByPhoneAsync(string phone);
         Task<bool> IsEmailExistsForOtherUserAsync(string email, int currentUserId);
         Task<bool> IsPhoneExistsForOtherUserAsync(string phone, int currentUserId);
-        Task<bool> SetActiveOrDeactive(int userId);
+        Task<bool> SetActive(int userId);
+        Task<bool> Deactive(int userId);
         Task<UserResponse> UpdateAsync(int id, UserUpdate user);
     }
 }

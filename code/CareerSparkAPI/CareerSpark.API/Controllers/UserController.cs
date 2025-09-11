@@ -72,7 +72,7 @@ namespace CareerSpark.API.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("setActiveOrDeactive/{userID}")]
+        [HttpPut("setActive/{userID}")]
         public async Task<IActionResult> SetStatus(int userID)
         {
 
@@ -85,8 +85,7 @@ namespace CareerSpark.API.Controllers
                         message = "Invalid user id",
                         timestamp = DateTime.UtcNow
                     });
-                var isActive = await _userService.SetActiveOrDeactive(userID);
-
+                var isActive = await _userService.SetActive(userID);
                 if (!isActive)
                 {
                     return NotFound(new
@@ -101,7 +100,7 @@ namespace CareerSpark.API.Controllers
                     return Ok(new
                     {
                         success = true,
-                        message = "Set active or deactive successfully",
+                        message = "Set active successfully",
                         timestamp = DateTime.UtcNow
                     });
                 }
@@ -115,7 +114,58 @@ namespace CareerSpark.API.Controllers
                 return StatusCode(500, new
                 {
                     success = false,
-                    message = "Something wrong when set active/deactive User",
+                    message = "Something wrong when set active User",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("Deactive/{userID}")]
+        public async Task<IActionResult> Deactive(int userID)
+        {
+
+            try
+            {
+                if (userID <= 0)
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid user id",
+                        timestamp = DateTime.UtcNow
+                    });
+                var isActive = await _userService.Deactive(userID);
+
+                if (!isActive)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Deactive failed",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Deactive successfully",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something wrong when set deactive User",
                     error = ex.Message,
                     timestamp = DateTime.UtcNow
                 });

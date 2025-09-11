@@ -12,9 +12,16 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
         }
 
-        public async Task SetActiveOrDeactive(User user)
+        public async Task SetActive(User user)
         {
-            user.IsActive = !user.IsActive;
+            // user.IsActive = !user.IsActive;
+            user.IsActive = true;
+            await UpdateAsync(user);
+        }
+
+        public async Task DeActive(User user)
+        {
+            user.IsActive = false;
             await UpdateAsync(user);
         }
 
