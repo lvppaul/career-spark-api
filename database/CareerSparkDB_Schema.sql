@@ -17,6 +17,11 @@ CREATE TABLE [User] (
     Name NVARCHAR(200) NOT NULL,
     Phone NVARCHAR(20),
     Email NVARCHAR(200) UNIQUE,
+	Password NVARCHAR(255) NOT NULL, 
+    RefreshToken NVARCHAR(500),
+    ExpiredRefreshTokenAt DATETIME, 
+    IsActive BIT NOT NULL DEFAULT 1,
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     RoleId INT NOT NULL,
     FOREIGN KEY (RoleId) REFERENCES Role(Id)
 );
