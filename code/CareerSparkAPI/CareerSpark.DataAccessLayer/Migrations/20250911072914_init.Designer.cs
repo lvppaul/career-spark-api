@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CareerSpark.DataAccessLayer.Migrations
 {
     [DbContext(typeof(CareerSparkDbContext))]
-    [Migration("20250908055100_AddAttributeUser")]
-    partial class AddAttributeUser
+    [Migration("20250911072914_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
