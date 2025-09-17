@@ -20,6 +20,15 @@ namespace CareerSpark.API
             // Add services to the container.
 
             builder.Services.AddControllers();
+            /* Nếu muốn bỏ qua null trong tất cả response JSON thì dùng đoạn này
+                 Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                     options.JsonSerializerOptions.DefaultIgnoreCondition
+                     = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+                });
+            */
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

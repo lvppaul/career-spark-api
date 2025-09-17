@@ -177,8 +177,11 @@ namespace CareerSpark.BusinessLayer.Services
             {
                 Success = true,
                 Message = "Login successful",
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
+                Data = new AuthenticationData
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken
+                }
             };
         }
 
@@ -260,8 +263,11 @@ namespace CareerSpark.BusinessLayer.Services
             {
                 Success = true,
                 Message = "Token refreshed successfully",
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken
+                Data = new AuthenticationData
+                {
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshToken
+                }
             };
 
         }
@@ -399,8 +405,11 @@ namespace CareerSpark.BusinessLayer.Services
                 {
                     Success = true,
                     Message = "User registered successfully",
-                    AccessToken = accessToken,
-                    RefreshToken = refreshToken
+                    Data = new AuthenticationData
+                    {
+                        AccessToken = accessToken,
+                        RefreshToken = refreshToken
+                    }
                 };
             }
             catch (Exception ex)
