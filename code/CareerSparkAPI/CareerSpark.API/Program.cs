@@ -112,7 +112,7 @@ namespace CareerSpark.API
             //Nó sẽ bỏ qua property lặp lại, thay vì serialize vô hạn.
             builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-
+            builder.Services.AddHttpClient();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

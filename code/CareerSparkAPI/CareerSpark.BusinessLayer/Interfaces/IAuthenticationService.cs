@@ -15,5 +15,6 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<AuthenticationResponse?> RefreshTokenAsync(string refreshToken);
         Task<AuthenticationResponse?> RegisterAsync(UserRequest request);
         Task<AuthenticationResponse?> LogoutAsync(LogoutRequest request);
+        Task<AuthenticationResponse> LoginWithGoogle(GoogleAccessTokenRequest request);
     }
 }
