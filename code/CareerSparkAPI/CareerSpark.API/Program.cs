@@ -1,4 +1,3 @@
-
 using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.BusinessLayer.Services;
 using CareerSpark.DataAccessLayer.Context;
@@ -79,6 +78,7 @@ namespace CareerSpark.API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<IQuestionTestService, QuestionTestService>();
 
 
             builder.Services.AddCors(options =>
