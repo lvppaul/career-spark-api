@@ -79,6 +79,9 @@ namespace CareerSpark.API
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IQuestionTestService, QuestionTestService>();
+            builder.Services.AddScoped<ITestAnswerService, TestAnswerService>();
+            builder.Services.AddScoped<IResultService, ResultService>();
+            builder.Services.AddScoped<ITestHistoryService, TestHistoryService>();
 
 
             builder.Services.AddCors(options =>
