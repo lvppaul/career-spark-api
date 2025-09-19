@@ -48,6 +48,7 @@ CREATE TABLE Comments (
 );
 
 -- Bảng QuestionTest
+-- Lưu lại bộ test RIASEC ( các câu hỏi )
 CREATE TABLE QuestionTest (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Content NVARCHAR(MAX) NOT NULL,
@@ -58,6 +59,7 @@ CREATE TABLE QuestionTest (
 );
 
 -- Bảng TestAnswer
+-- Lưu lại các câu trả lời của người dùng
 CREATE TABLE TestAnswer (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Content NVARCHAR(MAX) NOT NULL,
@@ -67,6 +69,7 @@ CREATE TABLE TestAnswer (
 );
 
 -- Bảng Result
+-- Lưu kết quả của bài test
 CREATE TABLE Result (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Content NVARCHAR(MAX),
@@ -79,6 +82,7 @@ CREATE TABLE Result (
 );
 
 -- Bảng TestHistory
+-- Lưu lại kết quả và các lựa chọn của người dùng.
 CREATE TABLE TestHistory (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     UserId INT NOT NULL,
@@ -90,6 +94,7 @@ CREATE TABLE TestHistory (
 );
 
 -- Bảng CareerField
+-- Lĩnh vực ( khoa học,...)
 CREATE TABLE CareerField (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(200) NOT NULL,
@@ -97,6 +102,7 @@ CREATE TABLE CareerField (
 );
 
 -- Bảng CareerPath
+-- Roadmap cho từng lĩnh vực
 CREATE TABLE CareerPath (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Title NVARCHAR(255) NOT NULL,
@@ -106,6 +112,7 @@ CREATE TABLE CareerPath (
 );
 
 -- Bảng CareerMileStone
+-- Các mốc trên roadmap
 CREATE TABLE CareerMileStone (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     CareerPathId INT NOT NULL,
@@ -117,6 +124,7 @@ CREATE TABLE CareerMileStone (
 );
 
 -- Bảng SubscriptionPlan
+-- Các gói 
 CREATE TABLE SubscriptionPlan (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(200) NOT NULL,
