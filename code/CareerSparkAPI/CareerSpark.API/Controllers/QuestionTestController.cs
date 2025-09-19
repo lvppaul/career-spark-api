@@ -56,7 +56,7 @@ public class QuestionTestController : ControllerBase
         return Ok(new { success = true, data = item, timestamp = DateTime.UtcNow });
     }
 
-    [Authorize(Roles = "Admin,Moderator")]
+    [Authorize(Roles = "Admin,Moderator,User")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] QuestionTestRequest request)
     {
@@ -64,7 +64,7 @@ public class QuestionTestController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, new { success = true, data = created, timestamp = DateTime.UtcNow });
     }
 
-    [Authorize(Roles = "Admin,Moderator")]
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] QuestionTestUpdate update)
     {
@@ -72,7 +72,7 @@ public class QuestionTestController : ControllerBase
         return Ok(new { success = true, data = updated, timestamp = DateTime.UtcNow });
     }
 
-    [Authorize(Roles = "Admin,Moderator")]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
