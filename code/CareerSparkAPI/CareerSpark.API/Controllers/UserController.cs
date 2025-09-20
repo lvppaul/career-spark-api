@@ -71,6 +71,54 @@ namespace CareerSpark.API.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid user ID. ID must be greater than 0",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var user = await _userService.GetByIdAsync(id);
+
+                if (user == null)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = $"User with ID {id} not found",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "User retrieved successfully",
+                    data = user,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving user",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpPut("setActive/{userID}")]
         public async Task<IActionResult> SetStatus(int userID)
