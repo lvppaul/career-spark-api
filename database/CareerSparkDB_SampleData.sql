@@ -14,10 +14,10 @@ INSERT INTO [User] (Name, Phone, Email, Password, RoleId) VALUES
 (N'Le Van C', '0905123456', 'c@example.com', '123456', 3);
 
 -- Thêm dữ liệu mẫu cho SubscriptionPlan
-INSERT INTO SubscriptionPlan (Name, Price, DurationDays, Description) VALUES
-(N'Free Plan', 0, 30, N'Gói miễn phí cơ bản'),
-(N'Standard Plan', 99.99, 90, N'Gói tiêu chuẩn 3 tháng'),
-(N'Premium Plan', 299.99, 365, N'Gói cao cấp 1 năm');
+INSERT INTO SubscriptionPlan (Name, Price, DurationDays, Description, Level,IsActive) VALUES
+(N'Free Plan', 0, 30, N'Gói miễn phí cơ bản',1,1),
+(N'Standard Plan', 99.99, 90, N'Gói tiêu chuẩn 3 tháng',2,1),
+(N'Premium Plan', 299.99, 365, N'Gói cao cấp 1 năm',3,1);
 
 -- Thêm dữ liệu mẫu cho CareerField
 INSERT INTO CareerField (Name, Description) VALUES
