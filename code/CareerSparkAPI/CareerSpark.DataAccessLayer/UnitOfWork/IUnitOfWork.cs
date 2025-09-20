@@ -10,6 +10,10 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         IQuestionTestRepository QuestionTestRepository { get; }
         ITestAnswerRepository TestAnswerRepository { get; }
         ITestHistoryRepository TestHistoryRepository { get; }
+        IOrderRepository OrderRepository { get; }
+        ISubscriptionPlanRepository SubscriptionPlanRepository { get; }
+        IUserSubscriptionRepository UserSubscriptionRepository { get; }
+        
         // Transaction management
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace CareerSpark.DataAccessLayer.Entities;
+﻿namespace CareerSpark.DataAccessLayer.Entities;
 
 public partial class SubscriptionPlan
 {
@@ -14,6 +11,10 @@ public partial class SubscriptionPlan
     public int DurationDays { get; set; }
 
     public string? Description { get; set; }
+
+    public int Level { get; set; }
+
+    public bool? IsActive { get; set; }
 
     public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
 }

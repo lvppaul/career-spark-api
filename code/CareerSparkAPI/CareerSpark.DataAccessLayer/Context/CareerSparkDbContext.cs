@@ -201,6 +201,7 @@ public partial class CareerSparkDbContext : DbContext
 
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Level).IsRequired();
         });
 
         modelBuilder.Entity<TestAnswer>(entity =>
