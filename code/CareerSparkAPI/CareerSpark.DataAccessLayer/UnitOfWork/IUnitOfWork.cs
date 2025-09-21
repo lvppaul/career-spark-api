@@ -10,6 +10,7 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         IQuestionTestRepository QuestionTestRepository { get; }
         ITestAnswerRepository TestAnswerRepository { get; }
         ITestHistoryRepository TestHistoryRepository { get; }
+        IBlogRepository BlogRepository { get; }
         IOrderRepository OrderRepository { get; }
         ISubscriptionPlanRepository SubscriptionPlanRepository { get; }
         IUserSubscriptionRepository UserSubscriptionRepository { get; }
