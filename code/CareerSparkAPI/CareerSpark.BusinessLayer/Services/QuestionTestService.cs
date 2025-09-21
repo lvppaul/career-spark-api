@@ -3,8 +3,10 @@ using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.DTOs.Update;
 using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.BusinessLayer.Mappings;
+using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Helper;
 using CareerSpark.DataAccessLayer.UnitOfWork;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -127,6 +129,138 @@ namespace CareerSpark.BusinessLayer.Services
                 await _unitOfWork.RollbackTransactionAsync();
                 throw;
             }
+        }
+
+        public async Task<SubmitTestResponse> SubmitAsync(SubmitTestRequest request)
+        {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (request.UserId <= 0) throw new ArgumentException("Invalid user id", nameof(request.UserId));
+            if (request.Answers == null || request.Answers.Count == 0) throw new ArgumentException("Answers are required", nameof(request.Answers));
+
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(request.UserId);
+            if (user == null) throw new InvalidOperationException($"User with id {request.UserId} not found");
+
+
+
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                // create TestAnswers from user answers
+                var createdAnswers = new List<TestAnswer>();
+
+                foreach (var ans in request.Answers)
+                {
+                    var qa = await _unitOfWork.QuestionTestRepository.GetByIdAsync(ans.QuestionId);
+                    if (qa == null)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        throw new InvalidOperationException($"Question with id {ans.QuestionId} not found");
+                    }
+
+                    var answer = new TestAnswer
+                    {
+                        Content = ans.IsSelected ? "Có" : "Không",
+                        IsSelected = ans.IsSelected,
+                        QuestionId = ans.QuestionId
+                    };
+                    var res = await _unitOfWork.TestAnswerRepository.CreateAsync(answer);
+                    if (res <= 0)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        throw new InvalidOperationException("Failed to create test answer");
+                    }
+                    createdAnswers.Add(answer);
+                }
+
+                // create TestHistory with ResultId = 0 (temporary)
+                foreach (var ans in createdAnswers)
+                {
+                    var history = new DataAccessLayer.Entities.TestHistory
+                    {
+                        UserId = request.UserId,
+                        TestAnswerId = ans.Id,
+                        ResultId = 0
+                    };
+                    var res = await _unitOfWork.TestHistoryRepository.CreateAsync(history);
+                    if (res <= 0)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        throw new InvalidOperationException("Failed to create test history");
+                    }
+                }
+
+               
+            
+           
+
+            // Calculate scores by joining TestAnswer -> QuestionTest and filtering by histories of user
+            var allAnswers = await _unitOfWork.TestAnswerRepository.GetAllAsync();
+            var allQuestions = await _unitOfWork.QuestionTestRepository.GetAllAsync();
+            var allHistories = await _unitOfWork.TestHistoryRepository.GetAllAsync();
+            var userAnswerIds = allHistories.Where(h => h.UserId == request.UserId).Select(h => h.TestAnswerId).ToHashSet();
+
+            var joined = from a in allAnswers
+                         join q in allQuestions on a.QuestionId equals q.Id
+                         where userAnswerIds.Contains(a.Id)
+                         group a by q.QuestionType into g
+                         select new { Type = g.Key, Score = g.Count(x => x.IsSelected == true) };
+
+            int R = joined.FirstOrDefault(s => s.Type == "Realistic")?.Score ?? 0;
+            int I = joined.FirstOrDefault(s => s.Type == "Investigative")?.Score ?? 0;
+            int A = joined.FirstOrDefault(s => s.Type == "Artistic")?.Score ?? 0;
+            int S = joined.FirstOrDefault(s => s.Type == "Social")?.Score ?? 0;
+            int E = joined.FirstOrDefault(s => s.Type == "Enterprising")?.Score ?? 0;
+            int C = joined.FirstOrDefault(s => s.Type == "Conventional")?.Score ?? 0;
+
+            // Save Result and update histories
+            var resultEntity = new DataAccessLayer.Entities.Result
+            {
+                Content = $"Kết quả RIASEC cho User {request.UserId}",
+                R = R,
+                I = I,
+                A = A,
+                S = S,
+                E = E,
+                C = C
+            };
+
+         
+                var created = await _unitOfWork.ResultRepository.CreateAsync(resultEntity);
+                if (created <= 0)
+                {
+                    throw new InvalidOperationException("Failed to create result");
+                }
+
+                var historiesToUpdate = allHistories.Where(h => h.UserId == request.UserId && h.ResultId == 0).ToList();
+                foreach (var h in historiesToUpdate)
+                {
+                    h.ResultId = resultEntity.Id;
+                }
+                var updated = await _unitOfWork.TestHistoryRepository.UpdateRangeAsync(historiesToUpdate);
+                if (updated <= 0)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw new InvalidOperationException("Failed to update histories with result id");
+                }
+
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+
+            return new SubmitTestResponse
+            {
+                ResultId = resultEntity.Id,
+                R = R,
+                I = I,
+                A = A,
+                S = S,
+                E = E,
+                C = C
+            };
         }
     }
 }

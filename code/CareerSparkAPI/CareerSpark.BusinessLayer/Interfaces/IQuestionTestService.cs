@@ -18,5 +18,6 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<QuestionTestResponse> CreateAsync(QuestionTestRequest request);
         Task<QuestionTestResponse> UpdateAsync(int id, QuestionTestUpdate update);
         Task<bool> RemoveAsync(int id);
+        Task<SubmitTestResponse> SubmitAsync(SubmitTestRequest request);
     }
 }

@@ -80,4 +80,20 @@ public class QuestionTestController : ControllerBase
         if (!ok) return NotFound(new { success = false, message = "Delete failed or not found" });
         return Ok(new { success = true, message = "Deleted", timestamp = DateTime.UtcNow });
     }
+
+    [HttpPost("submit")]
+    public async Task<IActionResult> Submit([FromBody] SubmitTestRequest request)
+    {
+        var result = await _service.SubmitAsync(request);
+        return Ok(new
+        {
+            success = true,
+            data = new
+            {
+                resultId = result.ResultId,
+                scores = new { result.R, result.I, result.A, result.S, result.E, result.C }
+            },
+            timestamp = DateTime.UtcNow
+        });
+    }
 }
