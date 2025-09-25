@@ -29,4 +29,6 @@ public partial class User
     public virtual ICollection<TestHistory> TestHistories { get; set; } = new List<TestHistory>();
 
     public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
+
+    public ICollection<TestSession> TestSessions { get; set; }
 }

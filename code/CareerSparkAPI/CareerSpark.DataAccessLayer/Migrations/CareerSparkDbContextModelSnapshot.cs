@@ -184,20 +184,10 @@ namespace CareerSpark.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreateAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("QuestionType")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdateAt")
-                        .HasColumnType("datetime");
 
                     b.HasKey("Id")
                         .HasName("PK__Question__3214EC0736814C31");
@@ -213,29 +203,34 @@ namespace CareerSpark.DataAccessLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("A")
+                    b.Property<int>("A")
                         .HasColumnType("int");
 
-                    b.Property<int?>("C")
+                    b.Property<int>("C")
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("E")
+                    b.Property<int>("E")
                         .HasColumnType("int");
 
-                    b.Property<int?>("I")
+                    b.Property<int>("I")
                         .HasColumnType("int");
 
-                    b.Property<int?>("R")
+                    b.Property<int>("R")
                         .HasColumnType("int");
 
-                    b.Property<int?>("S")
+                    b.Property<int>("S")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestSessionId")
                         .HasColumnType("int");
 
                     b.HasKey("Id")
-                        .HasName("PK__Result__3214EC079E3E8609");
+                        .HasName("PK__Result__3214EC07");
+
+                    b.HasIndex("TestSessionId");
 
                     b.ToTable("Result", (string)null);
                 });
@@ -295,11 +290,7 @@ namespace CareerSpark.DataAccessLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("IsSelected")
+                    b.Property<bool>("IsSelected")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
@@ -307,10 +298,15 @@ namespace CareerSpark.DataAccessLayer.Migrations
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
 
+                    b.Property<int>("TestSessionId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id")
-                        .HasName("PK__TestAnsw__3214EC07133EA14C");
+                        .HasName("PK__TestAnswer__3214EC07");
 
                     b.HasIndex("QuestionId");
+
+                    b.HasIndex("TestSessionId");
 
                     b.ToTable("TestAnswer", (string)null);
                 });
@@ -323,25 +319,57 @@ namespace CareerSpark.DataAccessLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ResultId")
+                    b.Property<int?>("ResultId")
                         .HasColumnType("int");
 
                     b.Property<int>("TestAnswerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestSessionId")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id")
-                        .HasName("PK__TestHist__3214EC074884C0E8");
+                        .HasName("PK__TestHistory__3214EC07");
 
                     b.HasIndex("ResultId");
 
                     b.HasIndex("TestAnswerId");
 
+                    b.HasIndex("TestSessionId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("TestHistory", (string)null);
+                });
+
+            modelBuilder.Entity("CareerSpark.DataAccessLayer.Entities.TestSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("EndAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<DateTime>("StartAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id")
+                        .HasName("PK__TestSession__3214EC07");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TestSession", (string)null);
                 });
 
             modelBuilder.Entity("CareerSpark.DataAccessLayer.Entities.User", b =>
@@ -471,40 +499,67 @@ namespace CareerSpark.DataAccessLayer.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CareerSpark.DataAccessLayer.Entities.Result", b =>
+                {
+                    b.HasOne("CareerSpark.DataAccessLayer.Entities.TestSession", "TestSession")
+                        .WithMany("Results")
+                        .HasForeignKey("TestSessionId")
+                        .IsRequired();
+
+                    b.Navigation("TestSession");
+                });
+
             modelBuilder.Entity("CareerSpark.DataAccessLayer.Entities.TestAnswer", b =>
                 {
                     b.HasOne("CareerSpark.DataAccessLayer.Entities.QuestionTest", "Question")
                         .WithMany("TestAnswers")
                         .HasForeignKey("QuestionId")
-                        .IsRequired()
-                        .HasConstraintName("FK__TestAnswe__Quest__48CFD27E");
+                        .IsRequired();
+
+                    b.HasOne("CareerSpark.DataAccessLayer.Entities.TestSession", "TestSession")
+                        .WithMany("TestAnswers")
+                        .HasForeignKey("TestSessionId")
+                        .IsRequired();
 
                     b.Navigation("Question");
+
+                    b.Navigation("TestSession");
                 });
 
             modelBuilder.Entity("CareerSpark.DataAccessLayer.Entities.TestHistory", b =>
                 {
-                    b.HasOne("CareerSpark.DataAccessLayer.Entities.Result", "Result")
+                    b.HasOne("CareerSpark.DataAccessLayer.Entities.Result", null)
                         .WithMany("TestHistories")
-                        .HasForeignKey("ResultId")
-                        .IsRequired()
-                        .HasConstraintName("FK__TestHisto__Resul__4E88ABD4");
+                        .HasForeignKey("ResultId");
 
                     b.HasOne("CareerSpark.DataAccessLayer.Entities.TestAnswer", "TestAnswer")
                         .WithMany("TestHistories")
                         .HasForeignKey("TestAnswerId")
-                        .IsRequired()
-                        .HasConstraintName("FK__TestHisto__TestA__4F7CD00D");
+                        .IsRequired();
+
+                    b.HasOne("CareerSpark.DataAccessLayer.Entities.TestSession", "TestSession")
+                        .WithMany("TestHistories")
+                        .HasForeignKey("TestSessionId")
+                        .IsRequired();
 
                     b.HasOne("CareerSpark.DataAccessLayer.Entities.User", "User")
                         .WithMany("TestHistories")
                         .HasForeignKey("UserId")
-                        .IsRequired()
-                        .HasConstraintName("FK__TestHisto__UserI__4D94879B");
-
-                    b.Navigation("Result");
+                        .IsRequired();
 
                     b.Navigation("TestAnswer");
+
+                    b.Navigation("TestSession");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CareerSpark.DataAccessLayer.Entities.TestSession", b =>
+                {
+                    b.HasOne("CareerSpark.DataAccessLayer.Entities.User", "User")
+                        .WithMany("TestSessions")
+                        .HasForeignKey("UserId")
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -579,11 +634,22 @@ namespace CareerSpark.DataAccessLayer.Migrations
                     b.Navigation("TestHistories");
                 });
 
+            modelBuilder.Entity("CareerSpark.DataAccessLayer.Entities.TestSession", b =>
+                {
+                    b.Navigation("Results");
+
+                    b.Navigation("TestAnswers");
+
+                    b.Navigation("TestHistories");
+                });
+
             modelBuilder.Entity("CareerSpark.DataAccessLayer.Entities.User", b =>
                 {
                     b.Navigation("Comments");
 
                     b.Navigation("TestHistories");
+
+                    b.Navigation("TestSessions");
 
                     b.Navigation("UserSubscriptions");
                 });

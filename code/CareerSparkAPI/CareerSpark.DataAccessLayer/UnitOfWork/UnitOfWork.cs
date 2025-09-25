@@ -16,6 +16,7 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         private ITestAnswerRepository _testAnswerRepository;
         private ITestHistoryRepository _testHistoryRepository;
         private IResultRepository _resultRepository;
+        private ITestSessionRepository _testSessionRepository;
 
         // Constructor to initialize the context
         public UnitOfWork() => _context ??= new CareerSparkDbContext();
@@ -49,6 +50,11 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         public IResultRepository ResultRepository
         {
             get { return _resultRepository ??= new ResultRepository(_context); }
+        }
+
+        public ITestSessionRepository TestSessionRepository
+        {
+            get { return _testSessionRepository ??= new TestSessionRepository(_context); }
         }
 
 

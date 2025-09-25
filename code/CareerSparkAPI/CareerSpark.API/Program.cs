@@ -78,10 +78,7 @@ namespace CareerSpark.API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-            builder.Services.AddScoped<IQuestionTestService, QuestionTestService>();
-            builder.Services.AddScoped<ITestAnswerService, TestAnswerService>();
-            builder.Services.AddScoped<IResultService, ResultService>();
-            builder.Services.AddScoped<ITestHistoryService, TestHistoryService>();
+
 
 
             builder.Services.AddCors(options =>
@@ -123,6 +120,11 @@ namespace CareerSpark.API
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+            }
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<CareerSparkDbContext>();
+                db.Database.Migrate(); // Tự động apply migration
             }
 
             app.UseHttpsRedirection();

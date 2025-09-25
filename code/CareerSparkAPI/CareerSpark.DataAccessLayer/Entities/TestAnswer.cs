@@ -6,14 +6,12 @@ namespace CareerSpark.DataAccessLayer.Entities;
 public partial class TestAnswer
 {
     public int Id { get; set; }
-
-    public string Content { get; set; } = null!;
-
-    public bool? IsSelected { get; set; }
-
+    public bool IsSelected { get; set; } = false;
     public int QuestionId { get; set; }
+    public int TestSessionId { get; set; }
 
-    public virtual QuestionTest Question { get; set; } = null!;
-
-    public virtual ICollection<TestHistory> TestHistories { get; set; } = new List<TestHistory>();
+    // Navigation
+    public QuestionTest Question { get; set; } = null!;
+    public TestSession TestSession { get; set; } = null!;
+    public ICollection<TestHistory> TestHistories { get; set; } = new List<TestHistory>();
 }

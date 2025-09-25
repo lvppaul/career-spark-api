@@ -48,33 +48,11 @@ namespace CareerSpark.DataAccessLayer.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreateAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    QuestionType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    UpdateAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                    QuestionType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__Question__3214EC0736814C31", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Result",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    R = table.Column<int>(type: "int", nullable: true),
-                    I = table.Column<int>(type: "int", nullable: true),
-                    A = table.Column<int>(type: "int", nullable: true),
-                    S = table.Column<int>(type: "int", nullable: true),
-                    E = table.Column<int>(type: "int", nullable: true),
-                    C = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK__Result__3214EC079E3E8609", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -123,26 +101,6 @@ namespace CareerSpark.DataAccessLayer.Migrations
                         name: "FK__CareerPat__Caree__5441852A",
                         column: x => x.CareerFieldId,
                         principalTable: "CareerField",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TestAnswer",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsSelected = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
-                    QuestionId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK__TestAnsw__3214EC07133EA14C", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK__TestAnswe__Quest__48CFD27E",
-                        column: x => x.QuestionId,
-                        principalTable: "QuestionTest",
                         principalColumn: "Id");
                 });
 
@@ -222,30 +180,20 @@ namespace CareerSpark.DataAccessLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TestHistory",
+                name: "TestSession",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    ResultId = table.Column<int>(type: "int", nullable: false),
-                    TestAnswerId = table.Column<int>(type: "int", nullable: false)
+                    StartAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getdate())"),
+                    EndAt = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__TestHist__3214EC074884C0E8", x => x.Id);
+                    table.PrimaryKey("PK__TestSession__3214EC07", x => x.Id);
                     table.ForeignKey(
-                        name: "FK__TestHisto__Resul__4E88ABD4",
-                        column: x => x.ResultId,
-                        principalTable: "Result",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK__TestHisto__TestA__4F7CD00D",
-                        column: x => x.TestAnswerId,
-                        principalTable: "TestAnswer",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK__TestHisto__UserI__4D94879B",
+                        name: "FK_TestSession_User_UserId",
                         column: x => x.UserId,
                         principalTable: "User",
                         principalColumn: "Id");
@@ -278,6 +226,92 @@ namespace CareerSpark.DataAccessLayer.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Result",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    R = table.Column<int>(type: "int", nullable: false),
+                    I = table.Column<int>(type: "int", nullable: false),
+                    A = table.Column<int>(type: "int", nullable: false),
+                    S = table.Column<int>(type: "int", nullable: false),
+                    E = table.Column<int>(type: "int", nullable: false),
+                    C = table.Column<int>(type: "int", nullable: false),
+                    TestSessionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__Result__3214EC07", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Result_TestSession_TestSessionId",
+                        column: x => x.TestSessionId,
+                        principalTable: "TestSession",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestAnswer",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IsSelected = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    QuestionId = table.Column<int>(type: "int", nullable: false),
+                    TestSessionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__TestAnswer__3214EC07", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TestAnswer_QuestionTest_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "QuestionTest",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_TestAnswer_TestSession_TestSessionId",
+                        column: x => x.TestSessionId,
+                        principalTable: "TestSession",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    TestSessionId = table.Column<int>(type: "int", nullable: false),
+                    TestAnswerId = table.Column<int>(type: "int", nullable: false),
+                    ResultId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__TestHistory__3214EC07", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TestHistory_Result_ResultId",
+                        column: x => x.ResultId,
+                        principalTable: "Result",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_TestHistory_TestAnswer_TestAnswerId",
+                        column: x => x.TestAnswerId,
+                        principalTable: "TestAnswer",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_TestHistory_TestSession_TestSessionId",
+                        column: x => x.TestSessionId,
+                        principalTable: "TestSession",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_TestHistory_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_CareerMileStone_CareerPathId",
                 table: "CareerMileStone",
@@ -299,9 +333,19 @@ namespace CareerSpark.DataAccessLayer.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Result_TestSessionId",
+                table: "Result",
+                column: "TestSessionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TestAnswer_QuestionId",
                 table: "TestAnswer",
                 column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestAnswer_TestSessionId",
+                table: "TestAnswer",
+                column: "TestSessionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TestHistory_ResultId",
@@ -314,8 +358,18 @@ namespace CareerSpark.DataAccessLayer.Migrations
                 column: "TestAnswerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TestHistory_TestSessionId",
+                table: "TestHistory",
+                column: "TestSessionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TestHistory_UserId",
                 table: "TestHistory",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestSession_UserId",
+                table: "TestSession",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -372,13 +426,16 @@ namespace CareerSpark.DataAccessLayer.Migrations
                 name: "SubscriptionPlan");
 
             migrationBuilder.DropTable(
-                name: "User");
-
-            migrationBuilder.DropTable(
                 name: "CareerField");
 
             migrationBuilder.DropTable(
                 name: "QuestionTest");
+
+            migrationBuilder.DropTable(
+                name: "TestSession");
+
+            migrationBuilder.DropTable(
+                name: "User");
 
             migrationBuilder.DropTable(
                 name: "Role");
