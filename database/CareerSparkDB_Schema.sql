@@ -1,4 +1,12 @@
-﻿-- Tạo database
+﻿-- Nếu DB đã tồn tại thì xóa đi
+IF DB_ID('CareerSparkDB') IS NOT NULL
+BEGIN
+    ALTER DATABASE CareerSparkDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE CareerSparkDB;
+END
+GO
+
+-- Tạo database mới
 CREATE DATABASE CareerSparkDB;
 GO
 
@@ -17,7 +25,7 @@ CREATE TABLE [User] (
     Name NVARCHAR(200) NOT NULL,
     Phone NVARCHAR(20),
     Email NVARCHAR(200) UNIQUE,
-	Password NVARCHAR(255) NOT NULL, 
+    Password NVARCHAR(255) NOT NULL, 
     RefreshToken NVARCHAR(500),
     ExpiredRefreshTokenAt DATETIME, 
     IsActive BIT NOT NULL DEFAULT 1,
@@ -47,29 +55,33 @@ CREATE TABLE Comments (
     FOREIGN KEY (BlogId) REFERENCES Blogs(Id)
 );
 
--- Bảng QuestionTest
--- Lưu lại bộ test RIASEC ( các câu hỏi )
+-- Bảng QuestionTest (đã bỏ Description, CreateAt, UpdateAt)
 CREATE TABLE QuestionTest (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Content NVARCHAR(MAX) NOT NULL,
-    Description NVARCHAR(MAX),
-    CreateAt DATETIME DEFAULT GETDATE(),
-    QuestionType NVARCHAR(50),
-    UpdateAt DATETIME
+    QuestionType NVARCHAR(50) NOT NULL
 );
 
--- Bảng TestAnswer
--- Lưu lại các câu trả lời của người dùng
+-- Bảng TestSession
+CREATE TABLE TestSession (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    StartAt DATETIME DEFAULT GETDATE(),
+    EndAt DATETIME,
+    FOREIGN KEY (UserId) REFERENCES [User](Id)
+);
+
+-- Bảng TestAnswer (đã bỏ Content dư thừa)
 CREATE TABLE TestAnswer (
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    Content NVARCHAR(MAX) NOT NULL,
     IsSelected BIT DEFAULT 0,
     QuestionId INT NOT NULL,
-    FOREIGN KEY (QuestionId) REFERENCES QuestionTest(Id)
+    TestSessionId INT NOT NULL,
+    FOREIGN KEY (QuestionId) REFERENCES QuestionTest(Id),
+    FOREIGN KEY (TestSessionId) REFERENCES TestSession(Id)
 );
 
 -- Bảng Result
--- Lưu kết quả của bài test
 CREATE TABLE Result (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Content NVARCHAR(MAX),
@@ -78,23 +90,23 @@ CREATE TABLE Result (
     A INT,
     S INT,
     E INT,
-    C INT
+    C INT,
+    TestSessionId INT NOT NULL,
+    FOREIGN KEY (TestSessionId) REFERENCES TestSession(Id)
 );
 
 -- Bảng TestHistory
--- Lưu lại kết quả và các lựa chọn của người dùng.
 CREATE TABLE TestHistory (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     UserId INT NOT NULL,
-    ResultId INT NOT NULL,
+    TestSessionId INT NOT NULL,
     TestAnswerId INT NOT NULL,
     FOREIGN KEY (UserId) REFERENCES [User](Id),
-    FOREIGN KEY (ResultId) REFERENCES Result(Id),
+    FOREIGN KEY (TestSessionId) REFERENCES TestSession(Id),
     FOREIGN KEY (TestAnswerId) REFERENCES TestAnswer(Id)
 );
 
 -- Bảng CareerField
--- Lĩnh vực ( khoa học,...)
 CREATE TABLE CareerField (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(200) NOT NULL,
@@ -102,7 +114,6 @@ CREATE TABLE CareerField (
 );
 
 -- Bảng CareerPath
--- Roadmap cho từng lĩnh vực
 CREATE TABLE CareerPath (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Title NVARCHAR(255) NOT NULL,
@@ -112,7 +123,6 @@ CREATE TABLE CareerPath (
 );
 
 -- Bảng CareerMileStone
--- Các mốc trên roadmap
 CREATE TABLE CareerMileStone (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     CareerPathId INT NOT NULL,
@@ -124,7 +134,6 @@ CREATE TABLE CareerMileStone (
 );
 
 -- Bảng SubscriptionPlan
--- Các gói 
 CREATE TABLE SubscriptionPlan (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(200) NOT NULL,
