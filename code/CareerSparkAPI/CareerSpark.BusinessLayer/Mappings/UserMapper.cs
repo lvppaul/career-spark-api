@@ -2,6 +2,7 @@
 using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.DTOs.Update;
 using CareerSpark.DataAccessLayer.Entities;
+using CareerSpark.DataAccessLayer.Enums;
 
 namespace CareerSpark.BusinessLayer.Mappings
 {
@@ -19,8 +20,7 @@ namespace CareerSpark.BusinessLayer.Mappings
                 Phone = user.Phone,
                 CreatedAt = user.CreatedAt,
                 IsActive = user.IsActive,
-                RoleId = user.RoleId,
-                RoleName = user.Role?.RoleName ?? string.Empty
+                Role = (UserRole)user.RoleId,
             };
         }
         #endregion
@@ -36,7 +36,7 @@ namespace CareerSpark.BusinessLayer.Mappings
                 Password = request.Password,
                 Name = request.Name?.Trim(),
                 Phone = request.Phone?.Trim(),
-                RoleId = request.RoleId,
+                RoleId = (int)request.RoleId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             };
@@ -56,12 +56,11 @@ namespace CareerSpark.BusinessLayer.Mappings
 
             if (!string.IsNullOrWhiteSpace(request.Phone))
                 user.Phone = request.Phone.Trim();
+            if (!string.IsNullOrWhiteSpace(request.avatarURL))
+                user.avatarURL = request.avatarURL.Trim();
 
-            if (request.RoleId.HasValue)
-                user.RoleId = request.RoleId.Value;
-
-            if (request.IsActive.HasValue)
-                user.IsActive = request.IsActive.Value;
+            user.RoleId = (int)request.RoleId;
+            user.IsActive = request.IsActive;
         }
         #endregion
     }

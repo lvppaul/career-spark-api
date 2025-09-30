@@ -3,7 +3,6 @@ using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.DTOs.Update;
 using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.BusinessLayer.Mappings;
-using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.Extensions.Logging;
 
@@ -75,14 +74,7 @@ namespace CareerSpark.BusinessLayer.Services
 
                 await _unitOfWork.BeginTransactionAsync();
 
-                var subscriptionPlan = new SubscriptionPlan
-                {
-                    Name = request.Name,
-                    Price = request.Price,
-                    DurationDays = request.DurationDays,
-                    Description = request.Description,
-                    IsActive = true
-                };
+                var subscriptionPlan = SubscriptionPlanMapper.ToEntity(request);
 
                 _unitOfWork.SubscriptionPlanRepository.PrepareCreate(subscriptionPlan);
                 await _unitOfWork.SaveAsync();
@@ -123,12 +115,6 @@ namespace CareerSpark.BusinessLayer.Services
                     }
                     existingPlan.Name = request.Name;
                 }
-
-                if (request.Price.HasValue)
-                    existingPlan.Price = request.Price.Value;
-
-                if (request.DurationDays.HasValue)
-                    existingPlan.DurationDays = request.DurationDays.Value;
 
                 if (!string.IsNullOrWhiteSpace(request.Description))
                     existingPlan.Description = request.Description;

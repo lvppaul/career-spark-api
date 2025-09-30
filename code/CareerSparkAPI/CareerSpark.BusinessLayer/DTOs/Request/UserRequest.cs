@@ -1,3 +1,4 @@
+using CareerSpark.DataAccessLayer.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace CareerSpark.BusinessLayer.DTOs.Request
@@ -19,7 +20,7 @@ namespace CareerSpark.BusinessLayer.DTOs.Request
         [RegularExpression(@"^(0|\+84)(\d{9})$", ErrorMessage = "Invalid phone number")]
         public string? Phone { get; set; }
         [Required(ErrorMessage = "Role is required")]
-        public int RoleId { get; set; }
+        public UserRole RoleId { get; set; }
 
 
     }

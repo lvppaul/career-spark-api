@@ -52,6 +52,7 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         public IBlogRepository BlogRepository
         {
             get { return _blogRepository ??= new BlogRepository(_context); }
+        }
         public IOrderRepository OrderRepository
         {
             get { return _orderRepository ??= new OrderRepository(_context); }

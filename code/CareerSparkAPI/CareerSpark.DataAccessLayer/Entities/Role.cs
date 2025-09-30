@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace CareerSpark.DataAccessLayer.Entities;
+﻿namespace CareerSpark.DataAccessLayer.Entities;
 
 public partial class Role
 {

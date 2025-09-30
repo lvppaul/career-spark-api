@@ -41,7 +41,7 @@ namespace CareerSpark.BusinessLayer.Services
                     };
                 }
 
-                if (user.RoleId != 2) // Only allow orders for regular users
+                if (user.RoleId != (int)UserRole.User) // Only allow orders for regular users
                 {
                     await _unitOfWork.RollbackTransactionAsync();
                     return new CreateOrderResponse
