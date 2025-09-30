@@ -4,8 +4,8 @@ GO
 -- Thêm dữ liệu mẫu cho Role
 INSERT INTO Role (RoleName) VALUES 
 (N'Admin'),
-(N'User'),
-(N'Moderator');
+(N'Moderator'),
+(N'User');
 
 -- Thêm dữ liệu mẫu cho User
 INSERT INTO [User] (Name, Phone, Email, Password, RoleId) VALUES
@@ -16,8 +16,8 @@ INSERT INTO [User] (Name, Phone, Email, Password, RoleId) VALUES
 -- Thêm dữ liệu mẫu cho SubscriptionPlan
 INSERT INTO SubscriptionPlan (Name, Price, DurationDays, Description, Level,IsActive) VALUES
 (N'Free Plan', 0, 30, N'Gói miễn phí cơ bản',1,1),
-(N'Standard Plan', 99.99, 90, N'Gói tiêu chuẩn 3 tháng',2,1),
-(N'Premium Plan', 299.99, 365, N'Gói cao cấp 1 năm',3,1);
+(N'Standard Plan', 99000, 90, N'Gói tiêu chuẩn 3 tháng',2,1),
+(N'Premium Plan', 299000, 365, N'Gói cao cấp 1 năm',3,1);
 
 -- Thêm dữ liệu mẫu cho CareerField
 INSERT INTO CareerField (Name, Description) VALUES
