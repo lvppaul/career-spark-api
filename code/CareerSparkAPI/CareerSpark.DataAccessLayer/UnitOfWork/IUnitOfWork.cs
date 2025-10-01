@@ -23,10 +23,9 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         IUserSubscriptionRepository UserSubscriptionRepository { get; }
         ICareerMappingRepository CareerMappingRepository { get; }
 
-        IBlogRepository BlogRepository { get; }
+    
         IOrderRepository OrderRepository { get; }
-        ISubscriptionPlanRepository SubscriptionPlanRepository { get; }
-        IUserSubscriptionRepository UserSubscriptionRepository { get; }
+      
         
         // Transaction management
         Task BeginTransactionAsync();

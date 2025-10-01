@@ -147,7 +147,7 @@ public partial class CareerSparkDbContext : DbContext
                 .HasMaxLength(50)
                 .HasConversion( //Value Conversion: Enum <-> String
                     v => v.ToString(), // khi lưu vào database thì chuyển enum thành string
-                    v => (OrderStatus)Enum.Parse(typeof(OrderStatus), v) // khi lấy từ database về thì chuyển string thành enum
+                    v => (OrderStatus)System.Enum.Parse(typeof(OrderStatus), v, true) // khi lấy từ database về thì chuyển string thành enum
                     )
                 .HasDefaultValue(OrderStatus.Pending);
 
