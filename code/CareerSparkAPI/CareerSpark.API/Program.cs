@@ -18,7 +18,10 @@ namespace CareerSpark.API
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
             /* Nếu muốn bỏ qua null trong tất cả response JSON thì dùng đoạn này
                  Services.AddControllers()
                 .AddJsonOptions(options =>
@@ -78,7 +81,11 @@ namespace CareerSpark.API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-            builder.Services.AddScoped<ITestService, TestService>();
+            builder.Services.AddScoped<IBlogService, BlogService>();
+            builder.Services.AddScoped<IVnPayService, VnPayService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
+            builder.Services.AddScoped<IUserSubscriptionService, UserSubscriptionService>();
 
 
             builder.Services.AddCors(options =>

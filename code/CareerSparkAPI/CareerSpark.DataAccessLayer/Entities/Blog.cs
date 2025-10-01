@@ -14,6 +14,8 @@ public partial class Blog
     public DateTime? CreateAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+    public bool IsPublished { get; set; }
+    public bool IsDeleted { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

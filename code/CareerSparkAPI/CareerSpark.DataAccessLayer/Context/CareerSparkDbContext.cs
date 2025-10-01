@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CareerSpark.DataAccessLayer.Entities;
+using CareerSpark.DataAccessLayer.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareerSpark.DataAccessLayer.Context;
@@ -25,6 +26,8 @@ public partial class CareerSparkDbContext : DbContext
     public virtual DbSet<CareerPath> CareerPaths { get; set; }
 
     public virtual DbSet<Comment> Comments { get; set; }
+
+    public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<QuestionTest> QuestionTests { get; set; }
 
@@ -132,6 +135,42 @@ public partial class CareerSparkDbContext : DbContext
                 .HasConstraintName("FK__Comments__UserId__4316F928");
         });
 
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Orders__3214EC0736814C31");
+
+            entity.ToTable("Orders");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasConversion( //Value Conversion: Enum <-> String
+                    v => v.ToString(), // khi lưu vào database thì chuyển enum thành string
+                    v => (OrderStatus)Enum.Parse(typeof(OrderStatus), v) // khi lấy từ database về thì chuyển string thành enum
+                    )
+                .HasDefaultValue(OrderStatus.Pending);
+
+            entity.Property(e => e.VnPayTransactionId).HasMaxLength(255);
+            entity.Property(e => e.VnPayOrderInfo).HasMaxLength(500);
+            entity.Property(e => e.VnPayResponseCode).HasMaxLength(10);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getutcdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.PaidAt).HasColumnType("datetime");
+            entity.Property(e => e.ExpiredAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Orders__UserId");
+
+            entity.HasOne(d => d.SubscriptionPlan).WithMany()
+                .HasForeignKey(d => d.SubscriptionPlanId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Orders__SubscriptionPlanId");
+        });
+
         modelBuilder.Entity<QuestionTest>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Question__3214EC07050C3ED2");
@@ -170,6 +209,7 @@ public partial class CareerSparkDbContext : DbContext
 
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Level).IsRequired();
         });
 
         modelBuilder.Entity<TestAnswer>(entity =>

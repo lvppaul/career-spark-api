@@ -12,6 +12,7 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         // Repositories
         private IUserRepository _userRepository;
         private IRoleRepository _roleRepository;
+        private IBlogRepository _blogRepository;
         private IQuestionTestRepository _questionTestRepository;
         private ITestAnswerRepository _testAnswerRepository;
         private ITestHistoryRepository _testHistoryRepository;
@@ -25,6 +26,9 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         private ISubscriptionPlanRepository _subscriptionPlanRepository;
         private IUserSubscriptionRepository _userSubscriptionRepository;
         private ICareerMappingRepository _careerMappingRepository;
+        private IOrderRepository _orderRepository;
+        private ISubscriptionPlanRepository _subscriptionPlanRepository;
+        private IUserSubscriptionRepository _userSubscriptionRepository;
 
         // Constructor to initialize the context
         public UnitOfWork(CareerSparkDbContext context)
@@ -107,6 +111,24 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         {
             get { return _careerMappingRepository ??= new CareerMappingRepository(_context); }
         }
+        public IBlogRepository BlogRepository
+        {
+            get { return _blogRepository ??= new BlogRepository(_context); }
+        public IOrderRepository OrderRepository
+        {
+            get { return _orderRepository ??= new OrderRepository(_context); }
+        }
+
+        public ISubscriptionPlanRepository SubscriptionPlanRepository
+        {
+            get { return _subscriptionPlanRepository ??= new SubscriptionPlanRepository(_context); }
+        }
+
+        public IUserSubscriptionRepository UserSubscriptionRepository
+        {
+            get { return _userSubscriptionRepository ??= new UserSubscriptionRepository(_context); }
+        }
+
 
 
         // Transaction Management

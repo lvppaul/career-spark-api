@@ -131,15 +131,16 @@ CREATE TABLE CareerMilestone (
     FOREIGN KEY (CareerPathId) REFERENCES CareerPath(Id)
 );
 
--- SubscriptionPlan
+-- Tạo bảng SubscriptionPlan
 CREATE TABLE SubscriptionPlan (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(200) NOT NULL,
     Price DECIMAL(18,2) NOT NULL,
     DurationDays INT NOT NULL,
-    Description NVARCHAR(MAX)
+    Description NVARCHAR(MAX),
+    Level INT NOT NULL,
+    IsActive BIT NOT NULL DEFAULT 1
 );
-
 -- UserSubscription
 CREATE TABLE UserSubscription (
     Id INT IDENTITY(1,1) PRIMARY KEY,
@@ -176,11 +177,12 @@ INSERT INTO [User] (Name, Phone, Email, Password, RoleId) VALUES
 (N'Tran Thi B','0987654321','b@example.com','123456',2),
 (N'Le Van C','0905123456','c@example.com','123456',3);
 
+
 -- Subscription Plans
-INSERT INTO SubscriptionPlan (Name, Price, DurationDays, Description) VALUES
-(N'Free Plan',0,30,N'Gói miễn phí cơ bản'),
-(N'Standard Plan',99.99,90,N'Gói tiêu chuẩn 3 tháng'),
-(N'Premium Plan',299.99,365,N'Gói cao cấp 1 năm');
+INSERT INTO SubscriptionPlan (Name, Price, DurationDays, Description, Level,IsActive) VALUES
+(N'Free Plan', 0, 30, N'Gói miễn phí cơ bản',1,1),
+(N'Standard Plan', 99.99, 90, N'Gói tiêu chuẩn 3 tháng',2,1),
+(N'Premium Plan', 299.99, 365, N'Gói cao cấp 1 năm',3,1);
 
 -- Career Fields
 INSERT INTO CareerField (Name, Description) VALUES
