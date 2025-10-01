@@ -14,7 +14,8 @@ GO
 -- Role
 CREATE TABLE Role (
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    RoleName NVARCHAR(100) NOT NULL
+    RoleName NVARCHAR(100) NOT NULL,
+	IsDeleted BIT NOT NULL DEFAULT 0
 );
 
 -- User
