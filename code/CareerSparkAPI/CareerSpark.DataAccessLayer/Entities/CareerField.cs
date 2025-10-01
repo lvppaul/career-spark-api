@@ -11,5 +11,7 @@ public partial class CareerField
 
     public string? Description { get; set; }
 
+    public virtual ICollection<CareerMapping> CareerMappings { get; set; } = new List<CareerMapping>();
+
     public virtual ICollection<CareerPath> CareerPaths { get; set; } = new List<CareerPath>();
 }

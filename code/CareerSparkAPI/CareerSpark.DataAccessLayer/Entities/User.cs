@@ -1,4 +1,7 @@
-﻿namespace CareerSpark.DataAccessLayer.Entities;
+﻿using System;
+using System.Collections.Generic;
+
+namespace CareerSpark.DataAccessLayer.Entities;
 
 public partial class User
 {
@@ -10,9 +13,7 @@ public partial class User
 
     public string? Email { get; set; }
 
-    public string? Password { get; set; }
-
-    public int RoleId { get; set; }
+    public string? Password { get; set; } = null!;
 
     public string? avatarURL { get; set; }
 
@@ -20,15 +21,19 @@ public partial class User
 
     public DateTime? ExpiredRefreshTokenAt { get; set; }
 
-    public bool? IsActive { get; set; }
+    public bool IsActive { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public int RoleId { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual Role Role { get; set; } = null!;
 
     public virtual ICollection<TestHistory> TestHistories { get; set; } = new List<TestHistory>();
+
+    public virtual ICollection<TestSession> TestSessions { get; set; } = new List<TestSession>();
 
     public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
 }

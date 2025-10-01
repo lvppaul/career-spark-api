@@ -16,12 +16,23 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         private IQuestionTestRepository _questionTestRepository;
         private ITestAnswerRepository _testAnswerRepository;
         private ITestHistoryRepository _testHistoryRepository;
-        private IOrderRepository _orderRepository;
+        private IResultRepository _resultRepository;
+        private ITestSessionRepository _testSessionRepository;
+    
+        private ICareerFieldRepository _careerFieldRepository;
+        private ICareerPathRepository _careerPathRepository;
+        private ICareerMileStoneRepository _careerMileStoneRepository;
+        private ICommentRepository _commentRepository;
         private ISubscriptionPlanRepository _subscriptionPlanRepository;
         private IUserSubscriptionRepository _userSubscriptionRepository;
-
+        private ICareerMappingRepository _careerMappingRepository;
+        private IOrderRepository _orderRepository;
+    
         // Constructor to initialize the context
-        public UnitOfWork() => _context ??= new CareerSparkDbContext();
+        public UnitOfWork(CareerSparkDbContext context)
+        {
+            _context = context;
+        }
 
         //Lazy loading of repositories
         public IUserRepository UserRepository
@@ -49,13 +60,39 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
             get { return _testHistoryRepository ??= new TestHistoryRepository(_context); }
         }
 
+        public IResultRepository ResultRepository
+        {
+            get { return _resultRepository ??= new ResultRepository(_context); }
+        }
+
+        public ITestSessionRepository TestSessionRepository
+        {
+            get { return _testSessionRepository ??= new TestSessionRepository(_context); }
+        }
+
         public IBlogRepository BlogRepository
         {
             get { return _blogRepository ??= new BlogRepository(_context); }
         }
-        public IOrderRepository OrderRepository
+
+        public ICareerFieldRepository CareerFieldRepository
         {
-            get { return _orderRepository ??= new OrderRepository(_context); }
+            get { return _careerFieldRepository ??= new CareerFieldRepository(_context); }
+        }
+
+        public ICareerPathRepository CareerPathRepository
+        {
+            get { return _careerPathRepository ??= new CareerPathRepository(_context); }
+        }
+
+        public ICareerMileStoneRepository CareerMilestoneRepository
+        {
+            get { return _careerMileStoneRepository ??= new CareerMileStoneRepository(_context); }
+        }
+
+        public ICommentRepository CommentRepository
+        {
+            get { return _commentRepository ??= new CommentRepository(_context); }
         }
 
         public ISubscriptionPlanRepository SubscriptionPlanRepository
@@ -67,6 +104,18 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         {
             get { return _userSubscriptionRepository ??= new UserSubscriptionRepository(_context); }
         }
+
+        public ICareerMappingRepository CareerMappingRepository
+        {
+            get { return _careerMappingRepository ??= new CareerMappingRepository(_context); }
+        }
+      
+        public IOrderRepository OrderRepository
+        {
+            get { return _orderRepository ??= new OrderRepository(_context); }
+        }
+
+   
 
 
 

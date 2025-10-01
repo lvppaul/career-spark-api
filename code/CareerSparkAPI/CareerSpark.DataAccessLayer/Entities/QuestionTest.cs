@@ -9,13 +9,7 @@ public partial class QuestionTest
 
     public string Content { get; set; } = null!;
 
-    public string? Description { get; set; }
-
-    public DateTime? CreateAt { get; set; }
-
-    public string? QuestionType { get; set; }
-
-    public DateTime? UpdateAt { get; set; }
+    public string QuestionType { get; set; } = null!;
 
     public virtual ICollection<TestAnswer> TestAnswers { get; set; } = new List<TestAnswer>();
 }

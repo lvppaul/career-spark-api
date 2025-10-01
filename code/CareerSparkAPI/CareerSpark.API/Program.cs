@@ -92,7 +92,7 @@ namespace CareerSpark.API
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
             builder.Services.AddScoped<IUserSubscriptionService, UserSubscriptionService>();
-
+            builder.Services.AddScoped<ITestService, TestService>();
 
             builder.Services.AddCors(options =>
             {
@@ -125,7 +125,7 @@ namespace CareerSpark.API
             //Nó sẽ bỏ qua property lặp lại, thay vì serialize vô hạn.
             builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-
+            builder.Services.AddHttpClient();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -134,6 +134,11 @@ namespace CareerSpark.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            //using (var scope = app.Services.CreateScope())
+            //{
+            //    var db = scope.ServiceProvider.GetRequiredService<CareerSparkDbContext>();
+            //    db.Database.Migrate(); // Tự động apply migration
+            //}
 
             app.UseHttpsRedirection();
             app.UseRouting();

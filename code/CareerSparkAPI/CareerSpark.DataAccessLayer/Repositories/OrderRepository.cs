@@ -3,7 +3,7 @@ using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Enums;
 using CareerSpark.DataAccessLayer.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
+using SysEnum = System.Enum;
 namespace CareerSpark.DataAccessLayer.Repositories
 {
     public class OrderRepository : GenericRepository<Order>, IOrderRepository
@@ -44,7 +44,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
             if (order == null) return false;
 
             // Parse string status to enum
-            if (Enum.TryParse<OrderStatus>(status, out var orderStatus))
+            if (SysEnum.TryParse<OrderStatus>(status, out var orderStatus))
             {
                 order.Status = orderStatus;
             }
