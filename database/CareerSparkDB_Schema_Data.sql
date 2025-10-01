@@ -26,6 +26,7 @@ CREATE TABLE [User] (
     Password NVARCHAR(255) NULL, 
     RefreshToken NVARCHAR(500),
     ExpiredRefreshTokenAt DATETIME, 
+	avatarURL NVARCHAR(255),
     IsActive BIT NOT NULL DEFAULT 1,
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     RoleId INT NOT NULL,
@@ -159,6 +160,27 @@ CREATE TABLE CareerMapping (
     RiasecType NVARCHAR(20) NOT NULL,
     CareerFieldId INT NOT NULL,
     FOREIGN KEY (CareerFieldId) REFERENCES CareerField(Id)
+);
+
+CREATE TABLE Orders
+(
+    Id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    UserId INT NOT NULL,
+    SubscriptionPlanId INT NOT NULL,
+    Amount DECIMAL(18, 2) NOT NULL,
+    Status NVARCHAR(50) NOT NULL DEFAULT 'Pending', -- Enum được lưu dạng string
+
+    VnPayTransactionId NVARCHAR(255) NULL,
+    VnPayOrderInfo NVARCHAR(500) NULL,
+    VnPayResponseCode NVARCHAR(10) NULL,
+
+    CreatedAt DATETIME NOT NULL DEFAULT (GETUTCDATE()),
+    PaidAt DATETIME NULL,
+    ExpiredAt DATETIME NULL,
+
+    -- Foreign Keys
+    FOREIGN KEY (UserId) REFERENCES [User](Id),
+    FOREIGN KEY (SubscriptionPlanId) REFERENCES SubscriptionPlan(Id)
 );
 
 PRINT 'Database schema created successfully.';
