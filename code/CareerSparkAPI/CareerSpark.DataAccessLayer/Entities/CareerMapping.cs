@@ -3,17 +3,13 @@ using System.Collections.Generic;
 
 namespace CareerSpark.DataAccessLayer.Entities;
 
-public partial class CareerPath
+public partial class CareerMapping
 {
     public int Id { get; set; }
 
-    public string Title { get; set; } = null!;
-
-    public string? Description { get; set; }
+    public string RiasecType { get; set; } = null!;
 
     public int CareerFieldId { get; set; }
 
     public virtual CareerField CareerField { get; set; } = null!;
-
-    public virtual ICollection<CareerMilestone> CareerMilestones { get; set; } = new List<CareerMilestone>();
 }

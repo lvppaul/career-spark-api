@@ -11,6 +11,7 @@ namespace CareerSpark.API.Controllers
     {
         private readonly IAuthenticationService _authenticationService;
 
+
         public AuthenticationController(IAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
@@ -106,6 +107,21 @@ namespace CareerSpark.API.Controllers
                 return BadRequest(result);
             }
 
+            return Ok(result);
+        }
+
+        [HttpPost("login-google")]
+        public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleAccessTokenRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _authenticationService.LoginWithGoogle(request);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
     }

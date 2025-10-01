@@ -9,5 +9,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
         public QuestionTestRepository(CareerSparkDbContext context) : base(context)
         {
         }
+
+       
     }
 }

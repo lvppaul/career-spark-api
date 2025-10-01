@@ -6,10 +6,13 @@ using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace CareerSpark.BusinessLayer.Services
 {
@@ -21,12 +24,14 @@ namespace CareerSpark.BusinessLayer.Services
         private readonly int _expiryMinutes;
         private readonly IConfiguration _configuration;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public AuthenticationService(IUnitOfWork unitOfWork, IConfiguration configuration)
+
+        public AuthenticationService(IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _configuration = configuration;
-
+            _httpClientFactory = httpClientFactory;
             _secretKey = configuration["JwtSettings:Key"] ?? throw new ArgumentNullException("JWT Key not configured");
             _issuer = configuration["JwtSettings:Issuer"] ?? throw new ArgumentNullException("JWT Issuer not configured");
             _audience = configuration["JwtSettings:Audience"] ?? throw new ArgumentNullException("JWT Audience not configured");
@@ -573,7 +578,97 @@ namespace CareerSpark.BusinessLayer.Services
             };
         }
 
+        public async Task<AuthenticationResponse> LoginWithGoogle(GoogleAccessTokenRequest request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", request.AccessToken);
+
+                // Gọi Google API để lấy thông tin user
+                var response = await client.GetAsync("https://www.googleapis.com/oauth2/v3/userinfo");
+                if (!response.IsSuccessStatusCode) return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = "Invalid Google access token"
+                };
 
 
+                var content = await response.Content.ReadAsStringAsync();
+                var userInfo = JsonSerializer.Deserialize<GoogleUserInfo>(content);
+
+                if (userInfo == null || string.IsNullOrEmpty(userInfo.Email))
+                    return  new AuthenticationResponse
+                    {
+                        Success = false,
+                        Message = "Failed to retrieve user info from Google"
+                    };
+
+                var user = await _unitOfWork.UserRepository.GetByEmailAsync(userInfo.Email);
+                string accessToken = string.Empty;
+                string refreshToken = string.Empty;
+                if (user == null)
+                {
+                    // Tạo tài khoản mới nếu chưa có trong hệ thống
+                    user = new User
+                    {
+                        Name = userInfo.Name,
+                        Email = userInfo.Email,
+                        IsActive = true,
+                        RoleId = 2, // Mặc định là role User
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _unitOfWork.UserRepository.PrepareCreate(user);
+                    await _unitOfWork.SaveAsync();
+                    // Lấy user vừa tạo để có ID
+                    var createdUser = await _unitOfWork.UserRepository.GetByEmailAsync(userInfo.Email);
+                    if (createdUser == null)
+                    {
+                        throw new Exception("Failed to retrieve created user");
+                    }
+                    var roleName = "User";
+                    accessToken = GenerateAccessToken(createdUser, roleName);
+                    refreshToken = GenerateRefreshToken();
+                }
+                else
+                {
+                    if (user.IsActive != true)
+                    {
+                        return new AuthenticationResponse
+                        {
+                            Success = false,
+                            Message = "Account is inactive"
+                        };
+                    }
+                    else
+                    {
+                        string roleName = user.Role?.RoleName ?? "User";
+                        accessToken = GenerateAccessToken(user, roleName);
+                        refreshToken = GenerateRefreshToken();
+                    }
+                }
+
+
+                return new AuthenticationResponse
+                {
+                    Success = true,
+                    Message = "Google login successful",
+                    Data = new AuthenticationData
+                    {
+                       AccessToken = accessToken,
+                       RefreshToken = refreshToken,
+
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+               return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = $"Google login failed: {ex.Message}"
+                };
+            }
+        }
     }
 }

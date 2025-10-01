@@ -1,15 +1,14 @@
-﻿using CareerSpark.DataAccessLayer.Entities;
+using System;
+using System.Collections.Generic;
+using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Enums;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace CareerSpark.DataAccessLayer.Context;
 
 public partial class CareerSparkDbContext : DbContext
 {
-    public CareerSparkDbContext()
-    {
-    }
+    
 
     public CareerSparkDbContext(DbContextOptions<CareerSparkDbContext> options)
         : base(options)
@@ -20,7 +19,9 @@ public partial class CareerSparkDbContext : DbContext
 
     public virtual DbSet<CareerField> CareerFields { get; set; }
 
-    public virtual DbSet<CareerMileStone> CareerMileStones { get; set; }
+    public virtual DbSet<CareerMapping> CareerMappings { get; set; }
+
+    public virtual DbSet<CareerMilestone> CareerMilestones { get; set; }
 
     public virtual DbSet<CareerPath> CareerPaths { get; set; }
 
@@ -40,28 +41,20 @@ public partial class CareerSparkDbContext : DbContext
 
     public virtual DbSet<TestHistory> TestHistories { get; set; }
 
+    public virtual DbSet<TestSession> TestSessions { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserSubscription> UserSubscriptions { get; set; }
 
-    private string GetConnectionString()
-    {
-        IConfiguration configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", true, true).Build();
-        return configuration["ConnectionStrings:DefaultConnection"];
-    }
+    
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer(GetConnectionString());
-    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Blog>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Blogs__3214EC075D1ED2B1");
+            entity.HasKey(e => e.Id).HasName("PK__Blogs__3214EC071B8C9BFE");
 
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("(getdate())")
@@ -72,31 +65,45 @@ public partial class CareerSparkDbContext : DbContext
 
         modelBuilder.Entity<CareerField>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CareerFi__3214EC072100DF97");
+            entity.HasKey(e => e.Id).HasName("PK__CareerFi__3214EC071B6D6078");
 
             entity.ToTable("CareerField");
 
             entity.Property(e => e.Name).HasMaxLength(200);
         });
 
-        modelBuilder.Entity<CareerMileStone>(entity =>
+        modelBuilder.Entity<CareerMapping>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CareerMi__3214EC079DCE204B");
+            entity.HasKey(e => e.Id).HasName("PK__CareerMa__3214EC072E68D511");
 
-            entity.ToTable("CareerMileStone");
+            entity.ToTable("CareerMapping");
+
+            entity.Property(e => e.RiasecType).HasMaxLength(20);
+
+            entity.HasOne(d => d.CareerField).WithMany(p => p.CareerMappings)
+                .HasForeignKey(d => d.CareerFieldId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CareerMap__Caree__6754599E");
+        });
+
+        modelBuilder.Entity<CareerMilestone>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__CareerMi__3214EC076007CB29");
+
+            entity.ToTable("CareerMilestone");
 
             entity.Property(e => e.SuggestedCourseUrl).HasMaxLength(500);
             entity.Property(e => e.Title).HasMaxLength(255);
 
-            entity.HasOne(d => d.CareerPath).WithMany(p => p.CareerMileStones)
+            entity.HasOne(d => d.CareerPath).WithMany(p => p.CareerMilestones)
                 .HasForeignKey(d => d.CareerPathId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__CareerMil__Caree__571DF1D5");
+                .HasConstraintName("FK__CareerMil__Caree__5DCAEF64");
         });
 
         modelBuilder.Entity<CareerPath>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CareerPa__3214EC076B8BF44D");
+            entity.HasKey(e => e.Id).HasName("PK__CareerPa__3214EC07045D85B9");
 
             entity.ToTable("CareerPath");
 
@@ -105,12 +112,12 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasOne(d => d.CareerField).WithMany(p => p.CareerPaths)
                 .HasForeignKey(d => d.CareerFieldId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__CareerPat__Caree__5441852A");
+                .HasConstraintName("FK__CareerPat__Caree__5AEE82B9");
         });
 
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC07648A7206");
+            entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC07EECE1EAD");
 
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("(getdate())")
@@ -120,12 +127,12 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasOne(d => d.Blog).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.BlogId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Comments__BlogId__4222D4EF");
+                .HasConstraintName("FK__Comments__BlogId__440B1D61");
 
             entity.HasOne(d => d.User).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Comments__UserId__412EB0B6");
+                .HasConstraintName("FK__Comments__UserId__4316F928");
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -140,7 +147,7 @@ public partial class CareerSparkDbContext : DbContext
                 .HasMaxLength(50)
                 .HasConversion( //Value Conversion: Enum <-> String
                     v => v.ToString(), // khi lưu vào database thì chuyển enum thành string
-                    v => (OrderStatus)Enum.Parse(typeof(OrderStatus), v) // khi lấy từ database về thì chuyển string thành enum
+                    v => (OrderStatus)System.Enum.Parse(typeof(OrderStatus), v, true) // khi lấy từ database về thì chuyển string thành enum
                     )
                 .HasDefaultValue(OrderStatus.Pending);
 
@@ -166,27 +173,28 @@ public partial class CareerSparkDbContext : DbContext
 
         modelBuilder.Entity<QuestionTest>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Question__3214EC0736814C31");
+            entity.HasKey(e => e.Id).HasName("PK__Question__3214EC07050C3ED2");
 
             entity.ToTable("QuestionTest");
 
-            entity.Property(e => e.CreateAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
             entity.Property(e => e.QuestionType).HasMaxLength(50);
-            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Result>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Result__3214EC079E3E8609");
+            entity.HasKey(e => e.Id).HasName("PK__Result__3214EC077DFCACFA");
 
             entity.ToTable("Result");
+
+            entity.HasOne(d => d.TestSession).WithMany(p => p.Results)
+                .HasForeignKey(d => d.TestSessionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Result__TestSess__5165187F");
         });
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Role__3214EC07078FA551");
+            entity.HasKey(e => e.Id).HasName("PK__Role__3214EC075D73DB95");
 
             entity.ToTable("Role");
 
@@ -195,7 +203,7 @@ public partial class CareerSparkDbContext : DbContext
 
         modelBuilder.Entity<SubscriptionPlan>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Subscrip__3214EC079DED5C3C");
+            entity.HasKey(e => e.Id).HasName("PK__Subscrip__3214EC070AFA0287");
 
             entity.ToTable("SubscriptionPlan");
 
@@ -206,7 +214,7 @@ public partial class CareerSparkDbContext : DbContext
 
         modelBuilder.Entity<TestAnswer>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TestAnsw__3214EC07133EA14C");
+            entity.HasKey(e => e.Id).HasName("PK__TestAnsw__3214EC07C7CEEEE5");
 
             entity.ToTable("TestAnswer");
 
@@ -215,52 +223,81 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasOne(d => d.Question).WithMany(p => p.TestAnswers)
                 .HasForeignKey(d => d.QuestionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__TestAnswe__Quest__48CFD27E");
+                .HasConstraintName("FK__TestAnswe__Quest__4D94879B");
+
+            entity.HasOne(d => d.TestSession).WithMany(p => p.TestAnswers)
+                .HasForeignKey(d => d.TestSessionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__TestAnswe__TestS__4E88ABD4");
         });
 
         modelBuilder.Entity<TestHistory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TestHist__3214EC074884C0E8");
+            entity.HasKey(e => e.Id).HasName("PK__TestHist__3214EC0724C44584");
 
             entity.ToTable("TestHistory");
-
-            entity.HasOne(d => d.Result).WithMany(p => p.TestHistories)
-                .HasForeignKey(d => d.ResultId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__TestHisto__Resul__4E88ABD4");
 
             entity.HasOne(d => d.TestAnswer).WithMany(p => p.TestHistories)
                 .HasForeignKey(d => d.TestAnswerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__TestHisto__TestA__4F7CD00D");
+                .HasConstraintName("FK__TestHisto__TestA__5629CD9C");
+
+            entity.HasOne(d => d.TestSession).WithMany(p => p.TestHistories)
+                .HasForeignKey(d => d.TestSessionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__TestHisto__TestS__5535A963");
 
             entity.HasOne(d => d.User).WithMany(p => p.TestHistories)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__TestHisto__UserI__4D94879B");
+                .HasConstraintName("FK__TestHisto__UserI__5441852A");
+        });
+
+        modelBuilder.Entity<TestSession>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__TestSess__3214EC078E28310F");
+
+            entity.ToTable("TestSession");
+
+            entity.Property(e => e.EndAt).HasColumnType("datetime");
+            entity.Property(e => e.StartAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.User).WithMany(p => p.TestSessions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__TestSessi__UserI__49C3F6B7");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__User__3214EC07ED5327BC");
+            entity.HasKey(e => e.Id).HasName("PK__User__3214EC07F9B336B1");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Email, "UQ__User__A9D10534B9E8E376").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__A9D10534D307CD4A").IsUnique();
 
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
             entity.Property(e => e.Email).HasMaxLength(200);
+            entity.Property(e => e.ExpiredRefreshTokenAt).HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.Password).HasMaxLength(255).IsRequired(false);
             entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.RefreshToken).HasMaxLength(500);
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User__RoleId__3A81B327");
+                .HasConstraintName("FK__User__RoleId__3C69FB99");
         });
 
         modelBuilder.Entity<UserSubscription>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__UserSubs__3214EC07B240E5C7");
+            entity.HasKey(e => e.Id).HasName("PK__UserSubs__3214EC07E55F3ECF");
 
             entity.ToTable("UserSubscription");
 
@@ -269,12 +306,12 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasOne(d => d.Plan).WithMany(p => p.UserSubscriptions)
                 .HasForeignKey(d => d.PlanId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__UserSubsc__PlanI__5DCAEF64");
+                .HasConstraintName("FK__UserSubsc__PlanI__6477ECF3");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserSubscriptions)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__UserSubsc__UserI__5CD6CB2B");
+                .HasConstraintName("FK__UserSubsc__UserI__6383C8BA");
         });
 
         OnModelCreatingPartial(modelBuilder);

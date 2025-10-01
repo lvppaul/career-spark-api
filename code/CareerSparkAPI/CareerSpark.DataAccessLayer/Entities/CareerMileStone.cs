@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CareerSpark.DataAccessLayer.Entities;
 
-public partial class CareerMileStone
+public partial class CareerMilestone
 {
     public int Id { get; set; }
 
@@ -13,7 +13,7 @@ public partial class CareerMileStone
 
     public string? Description { get; set; }
 
-    public int Index { get; set; }
+    public int StepOrder { get; set; }
 
     public string? SuggestedCourseUrl { get; set; }
 

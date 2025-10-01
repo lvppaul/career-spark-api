@@ -9,7 +9,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
     {
         protected CareerSparkDbContext _context;
 
-        public GenericRepository() => _context ??= new CareerSparkDbContext();
+    
 
         public GenericRepository(CareerSparkDbContext context) => _context = context;
 
