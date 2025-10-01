@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CareerSpark.BusinessLayer.DTOs.Request;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,8 @@ namespace CareerSpark.BusinessLayer.DTOs.Response
         public double A_Normalized { get; set; }
         public double S_Normalized { get; set; }
         public double E_Normalized { get; set; }
-        public double C_Normalized { get; set; } 
+        public double C_Normalized { get; set; }
+
+        public List<CareerFieldDto> SuggestedCareerFields { get; set; } = new();
     }
 }

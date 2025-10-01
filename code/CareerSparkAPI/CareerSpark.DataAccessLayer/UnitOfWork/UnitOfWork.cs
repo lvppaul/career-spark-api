@@ -24,9 +24,13 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         private ICommentRepository _commentRepository;
         private ISubscriptionPlanRepository _subscriptionPlanRepository;
         private IUserSubscriptionRepository _userSubscriptionRepository;
+        private ICareerMappingRepository _careerMappingRepository;
 
         // Constructor to initialize the context
-        public UnitOfWork() => _context ??= new CareerSparkDbContext();
+        public UnitOfWork(CareerSparkDbContext context)
+        {
+            _context = context;
+        }
 
         //Lazy loading of repositories
         public IUserRepository UserRepository
@@ -97,6 +101,11 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         public IUserSubscriptionRepository UserSubscriptionRepository
         {
             get { return _userSubscriptionRepository ??= new UserSubscriptionRepository(_context); }
+        }
+
+        public ICareerMappingRepository CareerMappingRepository
+        {
+            get { return _careerMappingRepository ??= new CareerMappingRepository(_context); }
         }
 
 

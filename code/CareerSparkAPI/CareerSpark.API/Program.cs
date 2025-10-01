@@ -121,11 +121,11 @@ namespace CareerSpark.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<CareerSparkDbContext>();
-                db.Database.Migrate(); // Tự động apply migration
-            }
+            //using (var scope = app.Services.CreateScope())
+            //{
+            //    var db = scope.ServiceProvider.GetRequiredService<CareerSparkDbContext>();
+            //    db.Database.Migrate(); // Tự động apply migration
+            //}
 
             app.UseHttpsRedirection();
             app.UseRouting();

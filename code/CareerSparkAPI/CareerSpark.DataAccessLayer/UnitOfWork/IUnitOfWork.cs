@@ -21,6 +21,7 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         ICommentRepository CommentRepository { get; }
         ISubscriptionPlanRepository SubscriptionPlanRepository { get; }
         IUserSubscriptionRepository UserSubscriptionRepository { get; }
+        ICareerMappingRepository CareerMappingRepository { get; }
 
         // Transaction management
         Task BeginTransactionAsync();

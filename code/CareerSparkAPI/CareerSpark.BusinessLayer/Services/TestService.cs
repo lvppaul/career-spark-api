@@ -27,10 +27,11 @@ namespace CareerSpark.BusinessLayer.Services
         {
             _logger.LogInformation("StartTestAsync called for UserId={UserId}", request.UserId);
 
+            var now = DateTime.Now;
             var session = new TestSession
             {
                 UserId = request.UserId,
-                StartAt = DateTime.Now
+                StartAt = now
             };
 
             _uow.TestSessionRepository.PrepareCreate(session);
@@ -41,7 +42,7 @@ namespace CareerSpark.BusinessLayer.Services
             return new StartTestResponse
             {
                 SessionId = session.Id,
-                StartAt = session.StartAt
+                StartAt = now
             };
         }
 
@@ -78,9 +79,6 @@ namespace CareerSpark.BusinessLayer.Services
                     _uow.TestHistoryRepository.PrepareCreate(testHistory);
                     await _uow.SaveAsync();
                 }
-            
-          
-
 
 
                 // 2. Lấy dữ liệu Answer + Question để tính điểm
@@ -102,9 +100,9 @@ namespace CareerSpark.BusinessLayer.Services
                     .Select(g => new
                     {
                         Type = g.Key,
-                        Score = g.Count(x => x.IsSelected),
+                        Score = g.Count(x => x.IsSelected == true),
                         Total = g.Count(),
-                        Normalized = (g.Count(x => x.IsSelected) * 100.0) / g.Count()
+                        Normalized = (g.Count(x => x.IsSelected == true) * 100.0) / g.Count()
                     }).ToList();
                 foreach (var s in scores)
                     _logger.LogInformation("Score {Type}: {Score}/{Total} ({Norm}%)", s.Type, s.Score, s.Total, s.Normalized);
@@ -130,22 +128,36 @@ namespace CareerSpark.BusinessLayer.Services
 
                 await _uow.CommitTransactionAsync();
 
-                // 4. Trả response
+                // 4. Ánh xạ CareerField qua CareerMapping
+                string topType = GetTopRiasecType(result);
+                var mappings = await _uow.CareerMappingRepository.GetAllWithFieldAsync();
+                var suggestedFields = mappings
+                    .Where(m => m.RiasecType == topType)
+                    .Select(m => new CareerFieldDto
+                    {
+                        Id = m.CareerField.Id,
+                        Name = m.CareerField.Name,
+                        Description = m.CareerField.Description
+                    }).ToList();
+
+                // 5. Trả response
                 return new TestResultResponse
                 {
-                    R = result.R,
-                    I = result.I,
-                    A = result.A,
-                    S = result.S,
-                    E = result.E,
-                    C = result.C,
+                    R = result.R ?? 0,
+                    I = result.I ?? 0,
+                    A = result.A ?? 0,
+                    S = result.S ?? 0,
+                    E = result.E ?? 0,
+                    C = result.C ?? 0,
 
                     R_Normalized = GetNorm("Realistic"),
                     I_Normalized = GetNorm("Investigative"),
                     A_Normalized = GetNorm("Artistic"),
                     S_Normalized = GetNorm("Social"),
                     E_Normalized = GetNorm("Enterprising"),
-                    C_Normalized = GetNorm("Conventional")
+                    C_Normalized = GetNorm("Conventional"),
+
+                    SuggestedCareerFields = suggestedFields
                 };
             }
             catch (Exception ex)
@@ -172,7 +184,7 @@ namespace CareerSpark.BusinessLayer.Services
             //if (!hasActiveSub)
             //    throw new UnauthorizedAccessException("Bạn cần mua gói thành viên để xem roadmap");
 
-            // 2. Lấy kết quả RIASEC từ TestSession
+            // 2. Lấy kết quả RIASEC từ TestSession và mapping career field
             var results = await _uow.ResultRepository.GetAllAsync();
             _logger.LogInformation("Loaded {Count} results from DB", results?.Count);
             var result = results.FirstOrDefault(r => r.TestSessionId == sessionId);
@@ -184,13 +196,16 @@ namespace CareerSpark.BusinessLayer.Services
             _logger.LogInformation("Result found: R={R}, I={I}, A={A}, S={S}, E={E}, C={C}",
        result.R, result.I, result.A, result.S, result.E, result.C);
 
-            // 3. Mapping CareerField (ví dụ logic demo)
-            int careerField;
-            if (result.I >= result.R && result.I >= result.S)
-                careerField = 1;
-            else
-                careerField = 2;
-            _logger.LogInformation("Mapped CareerField={CareerField}", careerField);
+
+
+
+            string topType = GetTopRiasecType(result);
+            var mappings = await _uow.CareerMappingRepository.GetAllAsync();
+            var careerFieldId = mappings.FirstOrDefault(m => m.RiasecType == topType)?.CareerFieldId;
+
+            if (careerFieldId == null)
+                throw new Exception($"No CareerField mapping found for type {topType}");
+
 
             // 4. Lấy CareerPath + Milestones
             var paths = await _uow.CareerPathRepository.GetAllWithCareerFieldAsync();
@@ -200,7 +215,7 @@ namespace CareerSpark.BusinessLayer.Services
        paths.Count, milestones.Count);
 
             var filteredPaths = paths
-                .Where(p => p.CareerField.Id == careerField)
+                .Where(p => p.CareerField.Id == careerFieldId)
                 .Select(p => new CareerPathDto
                 {
                     Title = p.Title,
@@ -216,11 +231,11 @@ namespace CareerSpark.BusinessLayer.Services
                 }).ToList();
 
             _logger.LogInformation("Filtered {FilteredCount} career paths for CareerField={CareerField}",
-       filteredPaths.Count, careerField);
+       filteredPaths.Count, careerFieldId);
 
             return new CareerPathResponse
             {
-                CareerField = careerField.ToString(),
+                CareerField = careerFieldId.ToString(),
                 Paths = filteredPaths
             };
         }
@@ -246,19 +261,34 @@ namespace CareerSpark.BusinessLayer.Services
                           QuestionId = q.Id,
                           QuestionContent = q.Content,
                           QuestionType = q.QuestionType,
-                          IsSelected = ta.IsSelected
+                          IsSelected = ta.IsSelected ?? false
                       }).ToList();
 
             return new TestHistoryResponse
             {
                 SessionId = session.Id,
                 UserId = session.UserId,
-                StartAt = session.StartAt,
+                StartAt = session.StartAt ?? DateTime.MinValue,
                 EndAt = session.EndAt,
                 Answers = joined
             };
         }
 
+        // Helper lấy RIASEC cao nhất
+        private string GetTopRiasecType(Result result)
+        {
+            var dict = new Dictionary<string, int>
+            {
+                { "R", result.R ?? 0 },
+                { "I", result.I ?? 0 },
+                { "A", result.A ?? 0 },
+                { "S", result.S ?? 0 },
+                { "E", result.E ?? 0 },
+                { "C", result.C ?? 0 }
+            };
+
+            return dict.OrderByDescending(x => x.Value).First().Key;
+        }
 
     }
 }

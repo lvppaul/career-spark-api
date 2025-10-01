@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CareerSpark.DataAccessLayer.Entities
+namespace CareerSpark.DataAccessLayer.Entities;
+
+public partial class TestSession
 {
-    public class TestSession
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public DateTime StartAt { get; set; } = DateTime.Now;
-        public DateTime? EndAt { get; set; }
+    public int Id { get; set; }
 
-        // Navigation
-        public User User { get; set; } = null!;
-        public ICollection<TestAnswer> TestAnswers { get; set; } = new List<TestAnswer>();
-        public ICollection<Result> Results { get; set; } = new List<Result>();
-        public ICollection<TestHistory> TestHistories { get; set; } = new List<TestHistory>();
-    }
+    public int UserId { get; set; }
+
+    public DateTime? StartAt { get; set; }
+
+    public DateTime? EndAt { get; set; }
+
+    public virtual ICollection<Result> Results { get; set; } = new List<Result>();
+
+    public virtual ICollection<TestAnswer> TestAnswers { get; set; } = new List<TestAnswer>();
+
+    public virtual ICollection<TestHistory> TestHistories { get; set; } = new List<TestHistory>();
+
+    public virtual User User { get; set; } = null!;
 }
