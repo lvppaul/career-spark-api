@@ -12,6 +12,16 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         ITestHistoryRepository TestHistoryRepository { get; }
         IResultRepository ResultRepository { get; }
         ITestSessionRepository TestSessionRepository { get; }
+
+        // Newly added repositories
+        IBlogRepository BlogRepository { get; }
+        ICareerFieldRepository CareerFieldRepository { get; }
+        ICareerPathRepository CareerPathRepository { get; }
+        ICareerMileStoneRepository CareerMilestoneRepository { get; }
+        ICommentRepository CommentRepository { get; }
+        ISubscriptionPlanRepository SubscriptionPlanRepository { get; }
+        IUserSubscriptionRepository UserSubscriptionRepository { get; }
+
         // Transaction management
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

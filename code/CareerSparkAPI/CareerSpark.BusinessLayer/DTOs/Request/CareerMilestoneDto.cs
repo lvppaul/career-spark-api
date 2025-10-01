@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace CareerSpark.BusinessLayer.DTOs.Request
 {
-    public class SubmitTestRequest
+    public class CareerMilestoneDto
     {
-        public int UserId { get; set; }
-        public int SessionId { get; set; }
-        public List<SubmitAnswerDto> Answers { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string SuggestedCourseUrl { get; set; }
     }
 }

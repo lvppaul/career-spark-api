@@ -17,6 +17,13 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         private ITestHistoryRepository _testHistoryRepository;
         private IResultRepository _resultRepository;
         private ITestSessionRepository _testSessionRepository;
+        private IBlogRepository _blogRepository;
+        private ICareerFieldRepository _careerFieldRepository;
+        private ICareerPathRepository _careerPathRepository;
+        private ICareerMileStoneRepository _careerMileStoneRepository;
+        private ICommentRepository _commentRepository;
+        private ISubscriptionPlanRepository _subscriptionPlanRepository;
+        private IUserSubscriptionRepository _userSubscriptionRepository;
 
         // Constructor to initialize the context
         public UnitOfWork() => _context ??= new CareerSparkDbContext();
@@ -55,6 +62,41 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         public ITestSessionRepository TestSessionRepository
         {
             get { return _testSessionRepository ??= new TestSessionRepository(_context); }
+        }
+
+        public IBlogRepository BlogRepository
+        {
+            get { return _blogRepository ??= new BlogRepository(_context); }
+        }
+
+        public ICareerFieldRepository CareerFieldRepository
+        {
+            get { return _careerFieldRepository ??= new CareerFieldRepository(_context); }
+        }
+
+        public ICareerPathRepository CareerPathRepository
+        {
+            get { return _careerPathRepository ??= new CareerPathRepository(_context); }
+        }
+
+        public ICareerMileStoneRepository CareerMilestoneRepository
+        {
+            get { return _careerMileStoneRepository ??= new CareerMileStoneRepository(_context); }
+        }
+
+        public ICommentRepository CommentRepository
+        {
+            get { return _commentRepository ??= new CommentRepository(_context); }
+        }
+
+        public ISubscriptionPlanRepository SubscriptionPlanRepository
+        {
+            get { return _subscriptionPlanRepository ??= new SubscriptionPlanRepository(_context); }
+        }
+
+        public IUserSubscriptionRepository UserSubscriptionRepository
+        {
+            get { return _userSubscriptionRepository ??= new UserSubscriptionRepository(_context); }
         }
 
 
