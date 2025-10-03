@@ -14,5 +14,7 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<TestResultResponse> SubmitTestAsync(SubmitTestRequest request);
         Task<CareerPathResponse> GetRoadmapAsync(int sessionId, int userId);
         Task<TestHistoryResponse> GetTestHistoryAsync(int sessionId, int userId);
+        Task<List<QuestionTestResponse>> GetQuestionsAsync();
+        Task<List<TestSessionDto>> GetUserTestSessionsAsync(int userId);
     }
 }

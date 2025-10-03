@@ -1,6 +1,7 @@
 ﻿using CareerSpark.BusinessLayer.DTOs.Request;
 using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.Interfaces;
+using CareerSpark.BusinessLayer.Mappings;
 using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.Extensions.Logging;
@@ -133,12 +134,8 @@ namespace CareerSpark.BusinessLayer.Services
                 var mappings = await _uow.CareerMappingRepository.GetAllWithFieldAsync();
                 var suggestedFields = mappings
                     .Where(m => m.RiasecType == topType)
-                    .Select(m => new CareerFieldDto
-                    {
-                        Id = m.CareerField.Id,
-                        Name = m.CareerField.Name,
-                        Description = m.CareerField.Description
-                    }).ToList();
+                    .Select(m => TestMapper.ToCareerFieldDto(m.CareerField))
+                    .ToList();
 
                 // 5. Trả response
                 return new TestResultResponse
@@ -198,7 +195,6 @@ namespace CareerSpark.BusinessLayer.Services
 
 
 
-
             string topType = GetTopRiasecType(result);
             var mappings = await _uow.CareerMappingRepository.GetAllAsync();
             var careerFieldId = mappings.FirstOrDefault(m => m.RiasecType == topType)?.CareerFieldId;
@@ -216,19 +212,8 @@ namespace CareerSpark.BusinessLayer.Services
 
             var filteredPaths = paths
                 .Where(p => p.CareerField.Id == careerFieldId)
-                .Select(p => new CareerPathDto
-                {
-                    Title = p.Title,
-                    Description = p.Description,
-                    Milestones = milestones
-                        .Where(m => m.CareerPathId == p.Id)
-                        .Select(m => new CareerMilestoneDto
-                        {
-                            Title = m.Title,
-                            Description = m.Description,
-                            SuggestedCourseUrl = m.SuggestedCourseUrl
-                        }).ToList()
-                }).ToList();
+                .Select(p => TestMapper.ToCareerPathDto(p, milestones))
+                .ToList();
 
             _logger.LogInformation("Filtered {FilteredCount} career paths for CareerField={CareerField}",
        filteredPaths.Count, careerFieldId);
@@ -256,22 +241,35 @@ namespace CareerSpark.BusinessLayer.Services
                 .Join(questions,
                       ta => ta.QuestionId,
                       q => q.Id,
-                      (ta, q) => new TestHistoryAnswerDto
-                      {
-                          QuestionId = q.Id,
-                          QuestionContent = q.Content,
-                          QuestionType = q.QuestionType,
-                          IsSelected = ta.IsSelected ?? false
-                      }).ToList();
+                      (ta, q) => TestMapper.ToTestHistoryAnswerDto(q, ta))
+                      .ToList();
 
             return new TestHistoryResponse
             {
                 SessionId = session.Id,
                 UserId = session.UserId,
                 StartAt = session.StartAt ?? DateTime.MinValue,
-                EndAt = session.EndAt,
                 Answers = joined
             };
+        }
+
+        public async Task<List<TestSessionDto>> GetUserTestSessionsAsync(int userId)
+        {
+            _logger.LogInformation("GetUserTestSessionsAsync called for UserId={UserId}", userId);
+            var sessions = await _uow.TestSessionRepository.GetAllAsync();
+            var userSessions = sessions
+                .Where(s => s.UserId == userId)
+                .OrderByDescending(s => s.StartAt)
+                .Select(s => new TestSessionDto
+                {
+                    SessionId = s.Id,
+                    StartAt = s.StartAt ?? DateTime.MinValue,
+                
+                })
+                .ToList();
+
+            _logger.LogInformation("Found {Count} sessions for UserId={UserId}", userSessions.Count, userId);
+            return userSessions;
         }
 
         // Helper lấy RIASEC cao nhất
@@ -290,5 +288,13 @@ namespace CareerSpark.BusinessLayer.Services
             return dict.OrderByDescending(x => x.Value).First().Key;
         }
 
+        public async Task<List<QuestionTestResponse>> GetQuestionsAsync()
+        {
+            _logger.LogInformation("GetQuestionsAsync called");
+            var questions = await _uow.QuestionTestRepository.GetAllAsync();
+            var result = questions.Select(TestMapper.ToQuestionTestResponse).ToList();
+            _logger.LogInformation("GetQuestionsAsync returning {Count} items", result.Count);
+            return result;
+        }
     }
 }

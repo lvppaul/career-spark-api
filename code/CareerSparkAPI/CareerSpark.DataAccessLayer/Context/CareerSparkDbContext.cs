@@ -259,7 +259,6 @@ public partial class CareerSparkDbContext : DbContext
 
             entity.ToTable("TestSession");
 
-            entity.Property(e => e.EndAt).HasColumnType("datetime");
             entity.Property(e => e.StartAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
