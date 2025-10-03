@@ -165,6 +165,59 @@ namespace CareerSpark.BusinessLayer.Services
             }
         }
 
+        public async Task<TestResultResponse> GetResultBySessionAsync(int sessionId)
+        {
+            var results = await _uow.ResultRepository.GetAllAsync();
+            var result = results.FirstOrDefault(r => r.TestSessionId == sessionId);
+            if (result == null)
+            {
+                throw new Exception("Result not found");
+            }
+
+            // Compute normalized values by looking up questions of each type
+            var answers = await _uow.TestAnswerRepository.GetAllAsync();
+            var questions = await _uow.QuestionTestRepository.GetAllAsync();
+            var joined = answers
+                .Where(a => a.TestSessionId == sessionId)
+                .Join(questions,
+                      ta => ta.QuestionId,
+                      q => q.Id,
+                      (ta, q) => new { ta.IsSelected, q.QuestionType });
+
+            double Norm(string type)
+            {
+                var group = joined.Where(x => x.QuestionType == type).ToList();
+                if (group.Count == 0) return 0;
+                var selected = group.Count(x => x.IsSelected == true);
+                return selected * 100.0 / group.Count;
+            }
+
+            // Suggested fields by top type
+            string topType = GetTopRiasecType(result);
+            var mappings = await _uow.CareerMappingRepository.GetAllWithFieldAsync();
+            var suggestedFields = mappings
+                .Where(m => m.RiasecType == topType)
+                .Select(m => TestMapper.ToCareerFieldDto(m.CareerField))
+                .ToList();
+
+            return new TestResultResponse
+            {
+                R = result.R ?? 0,
+                I = result.I ?? 0,
+                A = result.A ?? 0,
+                S = result.S ?? 0,
+                E = result.E ?? 0,
+                C = result.C ?? 0,
+                R_Normalized = Norm("Realistic"),
+                I_Normalized = Norm("Investigative"),
+                A_Normalized = Norm("Artistic"),
+                S_Normalized = Norm("Social"),
+                E_Normalized = Norm("Enterprising"),
+                C_Normalized = Norm("Conventional"),
+                SuggestedCareerFields = suggestedFields
+            };
+        }
+
 
         public async Task<CareerPathResponse> GetRoadmapAsync(int sessionId, int userId)
         {
@@ -263,8 +316,7 @@ namespace CareerSpark.BusinessLayer.Services
                 .Select(s => new TestSessionDto
                 {
                     SessionId = s.Id,
-                    StartAt = s.StartAt ?? DateTime.MinValue,
-                
+                    StartAt = s.StartAt ?? DateTime.MinValue
                 })
                 .ToList();
 

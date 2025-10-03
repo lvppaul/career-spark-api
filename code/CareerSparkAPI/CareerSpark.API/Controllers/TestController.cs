@@ -22,11 +22,20 @@ namespace CareerSpark.API.Controllers
             return Ok(items);
         }
 
+        // lấy ra danh sách các bài test của user
         [HttpGet("sessions/{userId}")]
         public async Task<IActionResult> GetUserSessions(int userId)
         {
             var items = await _service.GetUserTestSessionsAsync(userId);
             return Ok(items);
+        }
+
+        // lấy ra result theo test session id
+        [HttpGet("result/{sessionId}")]
+        public async Task<IActionResult> GetResultBySession(int sessionId)
+        {
+            var result = await _service.GetResultBySessionAsync(sessionId);
+            return Ok(result);
         }
 
         [HttpPost("start")]
@@ -61,6 +70,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
+        // lấy ra test detail
         [HttpGet("history/{sessionId}/{userId}")]
         public async Task<IActionResult> GetTestHistory(int sessionId, int userId)
         {
