@@ -1,4 +1,5 @@
 using CareerSpark.DataAccessLayer.Enums;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace CareerSpark.BusinessLayer.DTOs.Update
@@ -15,6 +16,6 @@ namespace CareerSpark.BusinessLayer.DTOs.Update
         public UserRole RoleId { get; set; }
         [Required(ErrorMessage = "Status is required")]
         public bool IsActive { get; set; }
-        public string? avatarURL { get; set; }
+        public IFormFile avatarImage { get; set; }
     }
 }

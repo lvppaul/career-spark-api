@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace CareerSpark.DataAccessLayer.Entities;
+﻿namespace CareerSpark.DataAccessLayer.Entities;
 
 public partial class User
 {
@@ -16,6 +13,8 @@ public partial class User
     public string? Password { get; set; } = null!;
 
     public string? avatarURL { get; set; }
+
+    public string? avatarPublicId { get; set; }
 
     public string? RefreshToken { get; set; }
 

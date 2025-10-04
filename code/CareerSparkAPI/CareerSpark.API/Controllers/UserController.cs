@@ -1,4 +1,5 @@
-﻿using CareerSpark.BusinessLayer.DTOs.Update;
+﻿using CareerSpark.API.Responses;
+using CareerSpark.BusinessLayer.DTOs.Update;
 using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Helper;
@@ -302,6 +303,83 @@ namespace CareerSpark.API.Controllers
                     timestamp = DateTime.UtcNow
                 });
             }
+        }
+
+        [Authorize(Roles = "Admin,User")]
+        [HttpPut("/users/{userId}/avatar")]
+        [Consumes("multipart/form-data")] // Bắt buộc để nhận file
+        public async Task<IActionResult> UpdateAvatar(int userId, IFormFile file)
+        {
+            try
+            {
+                if (userId <= 0)
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Invalid user ID. ID must be greater than 0",
+                        Payload = null,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+                var existingUser = await _userService.GetByIdAsync(userId);
+                if (existingUser == null || existingUser.Id == 0)
+                {
+                    return NotFound(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "User not found",
+                        Payload = null,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "No file uploaded",
+                        Payload = null,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+                // Upload the file to Cloudinary
+                var uploadResult = await _userService.UpdateAvatar(userId, file);
+                if (!uploadResult)
+                {
+                    return StatusCode(500, new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Failed to upload avatar",
+                        Payload = null,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var updatedUser = await _userService.GetByIdAsync(userId);
+
+                return Ok(new ApiResponse<object>
+                {
+                    Success = true,
+                    Message = "Avatar uploaded and user updated successfully",
+                    Payload = new
+                    {
+                        avatarURL = updatedUser.avatarURL
+                    },
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Something went wrong when uploading avatar",
+                    Payload = null,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
         }
     }
 }

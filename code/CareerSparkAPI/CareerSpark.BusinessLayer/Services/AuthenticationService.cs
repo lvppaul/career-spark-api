@@ -8,7 +8,6 @@ using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Net.Mail;
 using System.Security.Claims;
@@ -603,7 +602,7 @@ namespace CareerSpark.BusinessLayer.Services
                 var userInfo = JsonSerializer.Deserialize<GoogleUserInfo>(content);
 
                 if (userInfo == null || string.IsNullOrEmpty(userInfo.Email))
-                    return  new AuthenticationResponse
+                    return new AuthenticationResponse
                     {
                         Success = false,
                         Message = "Failed to retrieve user info from Google"
@@ -660,15 +659,15 @@ namespace CareerSpark.BusinessLayer.Services
                     Message = "Google login successful",
                     Data = new AuthenticationData
                     {
-                       AccessToken = accessToken,
-                       RefreshToken = refreshToken,
+                        AccessToken = accessToken,
+                        RefreshToken = refreshToken,
 
                     }
                 };
             }
             catch (Exception ex)
             {
-               return new AuthenticationResponse
+                return new AuthenticationResponse
                 {
                     Success = false,
                     Message = $"Google login failed: {ex.Message}"
