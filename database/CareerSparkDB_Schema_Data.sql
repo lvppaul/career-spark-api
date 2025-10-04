@@ -28,6 +28,7 @@ CREATE TABLE [User] (
     RefreshToken NVARCHAR(500),
     ExpiredRefreshTokenAt DATETIME, 
 	avatarURL NVARCHAR(255),
+	avatarPublicId NVARCHAR(200),
     IsActive BIT NOT NULL DEFAULT 1,
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     RoleId INT NOT NULL,
