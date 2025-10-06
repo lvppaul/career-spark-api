@@ -148,12 +148,9 @@ namespace CareerSpark.API
 
             app.UseHttpsRedirection();
             app.UseRouting();
-
+            app.UseCors("AllowAllOrigins");
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.UseCors("AllowAllOrigins");
-
             app.MapControllers();
             app.MapHealthChecks("/health");
             app.Run();
