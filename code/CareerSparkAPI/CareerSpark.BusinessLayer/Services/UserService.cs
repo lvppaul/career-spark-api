@@ -3,6 +3,7 @@ using CareerSpark.BusinessLayer.DTOs.Update;
 using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.BusinessLayer.Mappings;
 using CareerSpark.DataAccessLayer.Entities;
+using CareerSpark.DataAccessLayer.Enums;
 using CareerSpark.DataAccessLayer.Helper;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using System.Net.Mail;
@@ -183,14 +184,15 @@ namespace CareerSpark.BusinessLayer.Services
             {
                 throw new ArgumentException("Invalid phone number format", nameof(userUpdate.Phone));
             }
-
-            if (userUpdate.RoleId.HasValue && userUpdate.RoleId <= 0)
+            // Kiểm tra RoleId có hợp lệ không (trong enum UserRole)
+            if (!Enum.IsDefined(typeof(UserRole), userUpdate.RoleId))
             {
-                throw new ArgumentException("Invalid role ID", nameof(userUpdate.RoleId));
+                throw new ArgumentException($"Invalid role: {userUpdate.RoleId}", nameof(userUpdate.RoleId));
             }
-            else if (userUpdate.RoleId.HasValue)
+            else
             {
-                var isValidRole = await IsValidRole(userUpdate.RoleId.Value);
+                // Kiểm tra RoleId có tồn tại trong DB không
+                var isValidRole = await IsValidRole((int)userUpdate.RoleId);
                 if (!isValidRole)
                 {
                     throw new InvalidOperationException($"Role with ID {userUpdate.RoleId} does not exist");
@@ -292,9 +294,9 @@ namespace CareerSpark.BusinessLayer.Services
             }
 
             // Kiểm tra RoleId nhập vào có tồn tại không nếu bị thay đổi
-            if (userUpdate.RoleId.HasValue && userUpdate.RoleId != existingUser.RoleId)
+            if ((int)userUpdate.RoleId != existingUser.RoleId)
             {
-                var role = await _unitOfWork.RoleRepository.GetByIdAsync(userUpdate.RoleId.Value);
+                var role = await _unitOfWork.RoleRepository.GetByIdAsync((int)userUpdate.RoleId);
                 if (role == null)
                 {
                     throw new InvalidOperationException($"Role with ID {userUpdate.RoleId} does not exist");
@@ -302,8 +304,8 @@ namespace CareerSpark.BusinessLayer.Services
             }
 
             // Ngăn ngừa việc vô hiệu hóa user Admin cuối cùng
-            // IsActive update có giá trị và IsActive update có giá trị là false và IsActive hiện tại là true
-            if (userUpdate.IsActive.HasValue && !userUpdate.IsActive.Value && existingUser.IsActive == true)
+            // IsActive update có giá trị là false và IsActive hiện tại là true
+            if (!userUpdate.IsActive && existingUser.IsActive == true)
             {
                 var userRole = await _unitOfWork.RoleRepository.GetByIdAsync(existingUser.RoleId);
                 // Nếu user hiện tại là Admin

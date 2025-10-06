@@ -1,7 +1,9 @@
 ﻿using CareerSpark.BusinessLayer.DTOs.Request;
 using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.Interfaces;
+using CareerSpark.BusinessLayer.Mappings;
 using CareerSpark.DataAccessLayer.Entities;
+using CareerSpark.DataAccessLayer.Enums;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -351,8 +353,17 @@ namespace CareerSpark.BusinessLayer.Services
                 };
             }
 
-            // Check if role exists
-            var role = await _unitOfWork.RoleRepository.GetByIdAsync(request.RoleId);
+            // Check if role exists and Enum is valid
+            if (!Enum.IsDefined(typeof(UserRole), request.RoleId))
+            {
+                return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = $"Invalid role: {request.RoleId}"
+                };
+            }
+
+            var role = await _unitOfWork.RoleRepository.GetByIdAsync((int)request.RoleId);
             if (role == null)
             {
                 return new AuthenticationResponse
@@ -367,16 +378,10 @@ namespace CareerSpark.BusinessLayer.Services
                 await _unitOfWork.BeginTransactionAsync();
 
                 // Create new user
-                var newUser = new User
-                {
-                    Name = request.Name,
-                    Email = request.Email,
-                    Phone = request.Phone,
-                    Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                    RoleId = request.RoleId,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow
-                };
+                // UserMapper để chuyển từ DTO Request sang Entity nhưng chưa mã hóa password
+                // Mã hóa password bằng BCrypt ở đây vì ở đây là tầng quản lý nghiệp vụ và có thể kiểm soát transaction 
+                var newUser = UserMapper.ToEntity(request);
+                newUser.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
                 // PrepareCreate để tránh gọi SaveChanges nhiều lần
                 // PrepareCreate chỉ thêm entity vào context chứ không lưu vào db ngay lập tức như CreateAsync

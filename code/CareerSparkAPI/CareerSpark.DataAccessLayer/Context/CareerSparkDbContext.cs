@@ -199,6 +199,8 @@ public partial class CareerSparkDbContext : DbContext
             entity.ToTable("Role");
 
             entity.Property(e => e.RoleName).HasMaxLength(100);
+
+            entity.Property( e => e.IsDeleted ).HasDefaultValue(false);
         });
 
         modelBuilder.Entity<SubscriptionPlan>(entity =>
@@ -287,6 +289,7 @@ public partial class CareerSparkDbContext : DbContext
             entity.Property(e => e.Password).HasMaxLength(255).IsRequired(false);
             entity.Property(e => e.Phone).HasMaxLength(20);
             entity.Property(e => e.RefreshToken).HasMaxLength(500);
+            entity.Property(e => e.avatarURL).HasMaxLength(255);
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)

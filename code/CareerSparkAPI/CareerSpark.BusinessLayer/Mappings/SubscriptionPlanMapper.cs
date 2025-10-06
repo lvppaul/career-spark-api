@@ -1,3 +1,4 @@
+using CareerSpark.BusinessLayer.DTOs.Request;
 using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.DataAccessLayer.Entities;
 
@@ -5,6 +6,18 @@ namespace CareerSpark.BusinessLayer.Mappings
 {
     public static class SubscriptionPlanMapper
     {
+        public static SubscriptionPlan ToEntity(this SubscriptionPlanRequest subscriptionPlanRequest)
+        {
+            return new SubscriptionPlan
+            {
+                Name = subscriptionPlanRequest.Name,
+                Price = subscriptionPlanRequest.Price,
+                Level = subscriptionPlanRequest.Level,
+                DurationDays = subscriptionPlanRequest.DurationDays,
+                Description = subscriptionPlanRequest.Description
+            };
+        }
+
         public static SubscriptionPlanResponse ToResponse(SubscriptionPlan subscriptionPlan)
         {
             return new SubscriptionPlanResponse

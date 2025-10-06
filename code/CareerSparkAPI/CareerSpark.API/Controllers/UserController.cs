@@ -1,5 +1,6 @@
 ﻿using CareerSpark.BusinessLayer.DTOs.Update;
 using CareerSpark.BusinessLayer.Interfaces;
+using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -71,8 +72,17 @@ namespace CareerSpark.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Get user by ID
+        /// </summary>
+        /// <param name="id">The ID of the user</param>
+        /// <returns>User object</returns>
         [Authorize(Roles = "Admin,Moderator")]
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(User), 200)]   // success
+        [ProducesResponseType(400)]                 // bad request
+        [ProducesResponseType(401)]                 // unauthorized
+        [ProducesResponseType(500)]                 // internal server error
         public async Task<IActionResult> GetUserById(int id)
         {
             try

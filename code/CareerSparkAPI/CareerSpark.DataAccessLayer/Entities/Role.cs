@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace CareerSpark.DataAccessLayer.Entities;
+﻿namespace CareerSpark.DataAccessLayer.Entities;
 
 public partial class Role
 {
@@ -9,6 +6,6 @@ public partial class Role
 
     public string RoleName { get; set; } = null!;
 
-    public bool IsDeleted { get; set; } = true;
+    public bool IsDeleted { get; set; } = false;
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

@@ -16,8 +16,14 @@ namespace CareerSpark.BusinessLayer.DTOs.Request
         [Range(1, 365, ErrorMessage = "Duration must be between 1 and 365 days")]
         public int DurationDays { get; set; }
 
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Level must be a positive integer")]
+        public int Level { get; set; }
+
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string? Description { get; set; }
+
+
     }
 
 

@@ -15,6 +15,8 @@ public partial class User
 
     public string? Password { get; set; } = null!;
 
+    public string? avatarURL { get; set; }
+
     public string? RefreshToken { get; set; }
 
     public DateTime? ExpiredRefreshTokenAt { get; set; }
