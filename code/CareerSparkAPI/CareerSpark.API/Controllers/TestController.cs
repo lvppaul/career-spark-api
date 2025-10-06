@@ -1,7 +1,5 @@
 ﻿using CareerSpark.BusinessLayer.DTOs.Request;
 using CareerSpark.BusinessLayer.Interfaces;
-using CareerSpark.BusinessLayer.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CareerSpark.API.Controllers
@@ -17,6 +15,29 @@ namespace CareerSpark.API.Controllers
             _service = service;
         }
 
+        [HttpGet("questions")]
+        public async Task<IActionResult> GetQuestions()
+        {
+            var items = await _service.GetQuestionsAsync();
+            return Ok(items);
+        }
+
+        // lấy ra danh sách các bài test của user
+        [HttpGet("sessions/{userId}")]
+        public async Task<IActionResult> GetUserSessions(int userId)
+        {
+            var items = await _service.GetUserTestSessionsAsync(userId);
+            return Ok(items);
+        }
+
+        // lấy ra result theo test session id
+        [HttpGet("result/{sessionId}")]
+        public async Task<IActionResult> GetResultBySession(int sessionId)
+        {
+            var result = await _service.GetResultBySessionAsync(sessionId);
+            return Ok(result);
+        }
+
         [HttpPost("start")]
         public async Task<IActionResult> StartTest([FromBody] StartTestRequest req)
         {
@@ -30,6 +51,7 @@ namespace CareerSpark.API.Controllers
             var result = await _service.SubmitTestAsync(req);
             return Ok(result);
         }
+
         [HttpGet("{sessionId}/roadmap/{userId}")]
         public async Task<IActionResult> GetRoadmap(int sessionId, int userId)
         {
@@ -48,6 +70,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
+        // lấy ra test detail
         [HttpGet("history/{sessionId}/{userId}")]
         public async Task<IActionResult> GetTestHistory(int sessionId, int userId)
         {
