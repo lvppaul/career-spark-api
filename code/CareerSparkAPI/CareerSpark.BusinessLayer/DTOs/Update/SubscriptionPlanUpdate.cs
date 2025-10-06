@@ -1,0 +1,26 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CareerSpark.BusinessLayer.DTOs.Update
+{
+    public class SubscriptionPlanUpdate
+    {
+        [Required]
+        [StringLength(200, ErrorMessage = "Name cannot exceed 200 characters")]
+        public string Name { get; set; }
+
+        [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
+        public decimal Price { get; set; }
+
+        [Required]
+        [Range(1, 365, ErrorMessage = "Duration must be between 1 and 365 days")]
+        public int DurationDays { get; set; }
+
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Level must be a positive integer")]
+        public int Level { get; set; }
+
+        [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
+        public string? Description { get; set; }
+    }
+}
