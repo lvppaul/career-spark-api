@@ -17,7 +17,7 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
         IBlogRepository BlogRepository { get; }
         ICareerFieldRepository CareerFieldRepository { get; }
         ICareerPathRepository CareerPathRepository { get; }
-        ICareerMileStoneRepository CareerMilestoneRepository { get; }
+        ICareerRoadmapRepository CareerRoadmapRepository { get; }
         ICommentRepository CommentRepository { get; }
         ISubscriptionPlanRepository SubscriptionPlanRepository { get; }
         IUserSubscriptionRepository UserSubscriptionRepository { get; }

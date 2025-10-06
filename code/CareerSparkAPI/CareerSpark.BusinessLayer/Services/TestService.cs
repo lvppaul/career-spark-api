@@ -258,22 +258,33 @@ namespace CareerSpark.BusinessLayer.Services
 
             // 4. Lấy CareerPath + Milestones
             var paths = await _uow.CareerPathRepository.GetAllWithCareerFieldAsync();
-            var milestones = await _uow.CareerMilestoneRepository.GetAllAsync();
+            var roadmaps = await _uow.CareerRoadmapRepository.GetAllAsync();
 
             _logger.LogInformation("Loaded {PathCount} career paths, {MilestoneCount} milestones",
-       paths.Count, milestones.Count);
+       paths.Count, roadmaps.Count);
 
             var filteredPaths = paths
-                .Where(p => p.CareerField.Id == careerFieldId)
-                .Select(p => TestMapper.ToCareerPathDto(p, milestones))
+            .Where(p => p.CareerField.Id == careerFieldId)
+            .Select(p =>
+            {
+              var roadmapDtos = roadmaps
+                .Where(r => r.CareerPathId == p.Id)
+                .OrderBy(r => r.StepOrder)
+                .Select(TestMapper.ToCareerRoadmapDto) 
                 .ToList();
+
+                    return TestMapper.ToCareerPathDto(p, roadmapDtos);
+                })
+                  .ToList();
+
+            var field = await _uow.CareerFieldRepository.GetByIdAsync(careerFieldId.Value);
 
             _logger.LogInformation("Filtered {FilteredCount} career paths for CareerField={CareerField}",
        filteredPaths.Count, careerFieldId);
 
             return new CareerPathResponse
             {
-                CareerField = careerFieldId.ToString(),
+                CareerField = TestMapper.ToCareerFieldDto(field),
                 Paths = filteredPaths
             };
         }

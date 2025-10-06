@@ -18,28 +18,30 @@ namespace CareerSpark.BusinessLayer.Mappings
             };
         }
 
-        public static CareerMilestoneDto ToCareerMilestoneDto(CareerMilestone entity)
+        public static CareerRoadmapDto ToCareerRoadmapDto(CareerRoadmap roadmap)
         {
-            return new CareerMilestoneDto
+            return new CareerRoadmapDto
             {
-                Title = entity.Title,
-                Description = entity.Description ?? string.Empty,
-                SuggestedCourseUrl = entity.SuggestedCourseUrl ?? string.Empty
+                Id = roadmap.Id,
+                StepOrder = roadmap.StepOrder,
+                Title = roadmap.Title,
+                Description = roadmap.Description,
+                SkillFocus = roadmap.SkillFocus,
+                DifficultyLevel = roadmap.DifficultyLevel,
+                DurationWeeks = roadmap.DurationWeeks,
+                SuggestedCourseUrl = roadmap.SuggestedCourseUrl
             };
         }
 
-        public static CareerPathDto ToCareerPathDto(CareerPath path, IEnumerable<CareerMilestone> allMilestones)
+        public static CareerPathDto ToCareerPathDto(CareerPath path, List<CareerRoadmapDto> roadmaps)
         {
-            var milestones = allMilestones
-                .Where(m => m.CareerPathId == path.Id)
-                .Select(ToCareerMilestoneDto)
-                .ToList();
-
             return new CareerPathDto
             {
+                Id = path.Id,
                 Title = path.Title,
-                Description = path.Description ?? string.Empty,
-                Milestones = milestones
+                Description = path.Description,
+                CareerFieldId = path.CareerFieldId,
+                Roadmaps = roadmaps
             };
         }
 

@@ -21,7 +21,7 @@ public partial class CareerSparkDbContext : DbContext
 
     public virtual DbSet<CareerMapping> CareerMappings { get; set; }
 
-    public virtual DbSet<CareerMilestone> CareerMilestones { get; set; }
+    public virtual DbSet<CareerRoadmap> CareerRoadmaps { get; set; }
 
     public virtual DbSet<CareerPath> CareerPaths { get; set; }
 
@@ -86,19 +86,20 @@ public partial class CareerSparkDbContext : DbContext
                 .HasConstraintName("FK__CareerMap__Caree__6754599E");
         });
 
-        modelBuilder.Entity<CareerMilestone>(entity =>
+        modelBuilder.Entity<CareerRoadmap>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CareerMi__3214EC076007CB29");
+            entity.ToTable("CareerRoadmap");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.SkillFocus).HasMaxLength(200);
+            entity.Property(e => e.DifficultyLevel).HasMaxLength(50);
+            entity.Property(e => e.SuggestedCourseUrl).HasMaxLength(255);
 
-            entity.ToTable("CareerMilestone");
-
-            entity.Property(e => e.SuggestedCourseUrl).HasMaxLength(500);
-            entity.Property(e => e.Title).HasMaxLength(255);
-
-            entity.HasOne(d => d.CareerPath).WithMany(p => p.CareerMilestones)
-                .HasForeignKey(d => d.CareerPathId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__CareerMil__Caree__5DCAEF64");
+            entity.HasOne(e => e.CareerPath)
+                  .WithMany(p => p.CareerRoadmaps)
+                  .HasForeignKey(e => e.CareerPathId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<CareerPath>(entity =>
