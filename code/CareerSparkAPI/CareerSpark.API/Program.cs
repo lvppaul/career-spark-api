@@ -131,6 +131,11 @@ namespace CareerSpark.API
             builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
             builder.Services.AddHttpClient();
+            builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
