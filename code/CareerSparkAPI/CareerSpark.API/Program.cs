@@ -22,6 +22,8 @@ namespace CareerSpark.API
             //  fix lỗi UTC timestamp
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+            builder.Services.AddHealthChecks();
+
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -152,7 +154,7 @@ namespace CareerSpark.API
             app.UseCors("AllowAllOrigins");
 
             app.MapControllers();
-
+            app.MapHealthChecks("/health");
             app.Run();
         }
     }
