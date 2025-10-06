@@ -197,11 +197,6 @@ PRINT 'Database schema created successfully.';
 INSERT INTO Role (RoleName) VALUES 
 (N'Admin'),(N'User'),(N'Moderator');
 
--- Users
-INSERT INTO [User] (Name, Phone, Email, Password, RoleId) VALUES
-(N'Nguyen Van A','0912345678','a@example.com','123456',1),
-(N'Tran Thi B','0987654321','b@example.com','123456',2),
-(N'Le Van C','0905123456','c@example.com','123456',3);
 
 
 -- Subscription Plans
@@ -461,14 +456,6 @@ go
 INSERT INTO CareerMapping (RiasecType, CareerFieldId) VALUES
 ('R',6),('I',1),('A',5),('S',4),('E',2),('C',2);
 
--- Blogs & Comments
-INSERT INTO Blogs (Title, Content) VALUES
-(N'Chào mừng đến Career Spark',N'Bài viết giới thiệu dự án Career Spark.'),
-(N'Mẹo chọn nghề nghiệp',N'5 mẹo giúp bạn định hướng nghề nghiệp.');
-
-INSERT INTO Comments (Content, UserId, BlogId) VALUES
-(N'Bài viết rất hay!',2,1),
-(N'Cảm ơn thông tin bổ ích.',1,2);
 
 /* ==============================
    SEED QUESTION TEST (58 câu)
@@ -552,4 +539,3 @@ INSERT INTO QuestionTest (Content, QuestionType) VALUES
 
 
 
-PRINT 'Database seeded successfully!';
