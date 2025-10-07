@@ -21,7 +21,7 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
     
         private ICareerFieldRepository _careerFieldRepository;
         private ICareerPathRepository _careerPathRepository;
-        private ICareerMileStoneRepository _careerMileStoneRepository;
+        private ICareerRoadmapRepository _careerRoadmapRepository;
         private ICommentRepository _commentRepository;
         private ISubscriptionPlanRepository _subscriptionPlanRepository;
         private IUserSubscriptionRepository _userSubscriptionRepository;
@@ -85,9 +85,9 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
             get { return _careerPathRepository ??= new CareerPathRepository(_context); }
         }
 
-        public ICareerMileStoneRepository CareerMilestoneRepository
+        public ICareerRoadmapRepository CareerRoadmapRepository
         {
-            get { return _careerMileStoneRepository ??= new CareerMileStoneRepository(_context); }
+            get { return _careerRoadmapRepository ??= new CareerRoadmapRepository(_context); }
         }
 
         public ICommentRepository CommentRepository

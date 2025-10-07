@@ -9,8 +9,8 @@ namespace CareerSpark.BusinessLayer.DTOs.Response
 {
     public class CareerPathResponse
     {
-        public string CareerField { get; set; }
-        public List<CareerPathDto> Paths { get; set; }
+        public CareerFieldDto CareerField { get; set; } = new();
+        public List<CareerPathDto> Paths { get; set; } = new();
 
     }
 }

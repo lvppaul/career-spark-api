@@ -4,9 +4,9 @@ using CareerSpark.DataAccessLayer.Interfaces;
 
 namespace CareerSpark.DataAccessLayer.Repositories
 {
-    public class CareerMileStoneRepository : GenericRepository<CareerMilestone>, ICareerMileStoneRepository
+    public class CareerRoadmapRepository : GenericRepository<CareerRoadmap>, ICareerRoadmapRepository
     {
-        public CareerMileStoneRepository(CareerSparkDbContext context) : base(context)
+        public CareerRoadmapRepository(CareerSparkDbContext context) : base(context)
         {
         }
     }

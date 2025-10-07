@@ -15,5 +15,5 @@ public partial class CareerPath
 
     public virtual CareerField CareerField { get; set; } = null!;
 
-    public virtual ICollection<CareerMilestone> CareerMilestones { get; set; } = new List<CareerMilestone>();
+    public virtual ICollection<CareerRoadmap> CareerRoadmaps { get; set; } = new List<CareerRoadmap>();
 }

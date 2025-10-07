@@ -11,7 +11,6 @@ public partial class TestSession
 
     public DateTime? StartAt { get; set; }
 
-    public DateTime? EndAt { get; set; }
 
     public virtual ICollection<Result> Results { get; set; } = new List<Result>();
 
