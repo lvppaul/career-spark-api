@@ -32,8 +32,8 @@ namespace CareerSpark.API.Controllers
                 {
                     return BadRequest(new
                     {
-                        success = false,
-                        message = $"Requested page {pageNumber} exceeds total available pages",
+                        Success = false,
+                        Message = $"Requested page {pageNumber} exceeds total available pages",
                         details = new
                         {
                             requestedPage = pageNumber,
@@ -41,14 +41,14 @@ namespace CareerSpark.API.Controllers
                             totalCount = result.TotalCount,
                             pageSize = result.PageSize,
                         },
-                        timestamp = DateTime.UtcNow
+                        Timestamp = DateTime.UtcNow
                     });
                 }
                 return Ok(new
                 {
-                    success = true,
-                    message = $"Successfully retrieved {result.Items.Count()} users from page {result.PageNumber} of {result.TotalPages}",
-                    data = result.Items,
+                    Success = true,
+                    Message = $"Successfully retrieved {result.Items.Count()} users from page {result.PageNumber} of {result.TotalPages}",
+                    Payload = result.Items,
                     pagination = new
                     {
                         totalCount = result.TotalCount,
@@ -58,17 +58,16 @@ namespace CareerSpark.API.Controllers
                         hasPrevious = result.HasPrevious,
                         hasNext = result.HasNext,
                     },
-                    timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
+                return StatusCode(500, new ApiResponse<object>
                 {
-                    success = false,
-                    message = "Something went wrong when retrieving users",
-                    error = ex.Message,
-                    timestamp = DateTime.UtcNow
+                    Success = false,
+                    Message = $"Something went wrong when retrieving users: {ex.Message}",
+                    Timestamp = DateTime.UtcNow
                 });
             }
         }
@@ -90,11 +89,11 @@ namespace CareerSpark.API.Controllers
             {
                 if (id <= 0)
                 {
-                    return BadRequest(new
+                    return BadRequest(new ApiResponse<object>
                     {
-                        success = false,
-                        message = "Invalid user ID. ID must be greater than 0",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = "Invalid user ID. ID must be greater than 0",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
 
@@ -102,30 +101,29 @@ namespace CareerSpark.API.Controllers
 
                 if (user == null)
                 {
-                    return NotFound(new
+                    return NotFound(new ApiResponse<object>
                     {
-                        success = false,
-                        message = $"User with ID {id} not found",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = $"User with ID {id} not found",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
 
-                return Ok(new
+                return Ok(new ApiResponse<object>
                 {
-                    success = true,
-                    message = "User retrieved successfully",
-                    data = user,
-                    timestamp = DateTime.UtcNow
+                    Success = true,
+                    Message = "User retrieved successfully",
+                    Payload = user,
+                    Timestamp = DateTime.UtcNow
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
+                return StatusCode(500, new ApiResponse<object>
                 {
-                    success = false,
-                    message = "Something went wrong when retrieving user",
-                    error = ex.Message,
-                    timestamp = DateTime.UtcNow
+                    Success = false,
+                    Message = $"Something went wrong when retrieving user: {ex.Message}",
+                    Timestamp = DateTime.UtcNow
                 });
             }
         }
@@ -138,44 +136,48 @@ namespace CareerSpark.API.Controllers
             try
             {
                 if (userID <= 0)
-                    return BadRequest(new
+                    return BadRequest(new ApiResponse<object>
                     {
-                        success = false,
-                        message = "Invalid user id",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = "Invalid user id",
+                        Timestamp = DateTime.UtcNow
                     });
                 var isActive = await _userService.SetActive(userID);
                 if (!isActive)
                 {
-                    return NotFound(new
+                    return NotFound(new ApiResponse<object>
                     {
-                        success = false,
-                        message = "Set active failed",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = "Set active failed",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
                 else
                 {
-                    return Ok(new
+                    return Ok(new ApiResponse<object>
                     {
-                        success = true,
-                        message = "Set active successfully",
-                        timestamp = DateTime.UtcNow
+                        Success = true,
+                        Message = "Set active successfully",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message,
+                    Timestamp = DateTime.UtcNow
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
+                return StatusCode(500, new ApiResponse<object>
                 {
-                    success = false,
-                    message = "Something wrong when set active User",
-                    error = ex.Message,
-                    timestamp = DateTime.UtcNow
+                    Success = false,
+                    Message = $"Something wrong when set active User: {ex.Message}",
+                    Timestamp = DateTime.UtcNow
                 });
             }
         }
@@ -188,45 +190,49 @@ namespace CareerSpark.API.Controllers
             try
             {
                 if (userID <= 0)
-                    return BadRequest(new
+                    return BadRequest(new ApiResponse<object>
                     {
-                        success = false,
-                        message = "Invalid user id",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = "Invalid user id",
+                        Timestamp = DateTime.UtcNow
                     });
                 var isActive = await _userService.Deactive(userID);
 
                 if (!isActive)
                 {
-                    return NotFound(new
+                    return NotFound(new ApiResponse<object>
                     {
-                        success = false,
-                        message = "Deactive failed",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = "Deactive failed",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
                 else
                 {
-                    return Ok(new
+                    return Ok(new ApiResponse<object>
                     {
-                        success = true,
-                        message = "Deactive successfully",
-                        timestamp = DateTime.UtcNow
+                        Success = true,
+                        Message = "Deactive successfully",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message,
+                    Timestamp = DateTime.UtcNow
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
+                return StatusCode(500, new ApiResponse<object>
                 {
-                    success = false,
-                    message = "Something wrong when set deactive User",
-                    error = ex.Message,
-                    timestamp = DateTime.UtcNow
+                    Success = false,
+                    Message = $"Something wrong when set deactive User: +{ex.Message}",
+                    Timestamp = DateTime.UtcNow
                 });
             }
         }
@@ -241,22 +247,22 @@ namespace CareerSpark.API.Controllers
                 // Check ModelState for data annotations
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new
+                    return BadRequest(new ApiResponse<object>
                     {
-                        success = false,
-                        message = "Invalid input data",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = "Invalid input data",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
 
                 //  Check if route ID is valid
                 if (id <= 0)
                 {
-                    return BadRequest(new
+                    return BadRequest(new ApiResponse<object>
                     {
-                        success = false,
-                        message = "Invalid user ID in route",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = "Invalid user ID in route",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
 
@@ -264,11 +270,11 @@ namespace CareerSpark.API.Controllers
                 var existingUser = await _userService.GetByIdAsync(id);
                 if (existingUser == null || existingUser.Id == 0)
                 {
-                    return NotFound(new
+                    return NotFound(new ApiResponse<object>
                     {
-                        success = false,
-                        message = "User not found",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = "User not found",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
                 // Perform the update
@@ -276,37 +282,36 @@ namespace CareerSpark.API.Controllers
 
                 if (updatedUser == null)
                 {
-                    return StatusCode(500, new
+                    return StatusCode(500, new ApiResponse<object>
                     {
-                        success = false,
-                        message = "Failed to update user information",
-                        timestamp = DateTime.UtcNow
+                        Success = false,
+                        Message = "Failed to update user information",
+                        Timestamp = DateTime.UtcNow
                     });
                 }
 
-                return Ok(new
+                return Ok(new ApiResponse<object>
                 {
-                    success = true,
-                    message = "User updated successfully",
-                    data = updatedUser,
-                    timestamp = DateTime.UtcNow
+                    Success = true,
+                    Message = "User updated successfully",
+                    Payload = updatedUser,
+                    Timestamp = DateTime.UtcNow
                 });
             }
 
             catch (Exception ex)
             {
-                return StatusCode(500, new
+                return StatusCode(500, new ApiResponse<object>
                 {
-                    success = false,
-                    message = "Something wrong happends when updating user information",
-                    error = ex.Message,
-                    timestamp = DateTime.UtcNow
+                    Success = false,
+                    Message = $"Something wrong happends when updating user information: + {ex.Message}",
+                    Timestamp = DateTime.UtcNow
                 });
             }
         }
 
         [Authorize(Roles = "Admin,User")]
-        [HttpPut("/users/{userId}/avatar")]
+        [HttpPut("{userId}/avatar")]
         [Consumes("multipart/form-data")] // Bắt buộc để nhận file
         public async Task<IActionResult> UpdateAvatar(int userId, IFormFile file)
         {
@@ -318,7 +323,6 @@ namespace CareerSpark.API.Controllers
                     {
                         Success = false,
                         Message = "Invalid user ID. ID must be greater than 0",
-                        Payload = null,
                         Timestamp = DateTime.UtcNow
                     });
                 }
@@ -329,7 +333,6 @@ namespace CareerSpark.API.Controllers
                     {
                         Success = false,
                         Message = "User not found",
-                        Payload = null,
                         Timestamp = DateTime.UtcNow
                     });
                 }
@@ -339,7 +342,6 @@ namespace CareerSpark.API.Controllers
                     {
                         Success = false,
                         Message = "No file uploaded",
-                        Payload = null,
                         Timestamp = DateTime.UtcNow
                     });
                 }
@@ -351,7 +353,6 @@ namespace CareerSpark.API.Controllers
                     {
                         Success = false,
                         Message = "Failed to upload avatar",
-                        Payload = null,
                         Timestamp = DateTime.UtcNow
                     });
                 }
@@ -375,7 +376,6 @@ namespace CareerSpark.API.Controllers
                 {
                     Success = false,
                     Message = "Something went wrong when uploading avatar",
-                    Payload = null,
                     Timestamp = DateTime.UtcNow
                 });
             }
