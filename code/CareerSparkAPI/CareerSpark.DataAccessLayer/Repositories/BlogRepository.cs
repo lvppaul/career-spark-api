@@ -28,7 +28,9 @@ namespace CareerSpark.DataAccessLayer.Repositories
 
         public override async Task<List<Blog>> GetAllAsync()
         {
-            return await BaseBlogQuery() // Only non-deleted and published blogs
+            return await _context.Blogs
+                .Include(b => b.Comments)
+                .Where(b => !b.IsDeleted)
                 .OrderByDescending(b => b.CreateAt) // Order by newest first
                 .ToListAsync();
         }

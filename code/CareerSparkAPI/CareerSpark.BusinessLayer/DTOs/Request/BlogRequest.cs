@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace CareerSpark.BusinessLayer.DTOs.Request
 {
@@ -10,5 +11,7 @@ namespace CareerSpark.BusinessLayer.DTOs.Request
 
         [Required(ErrorMessage = "Content is required")]
         public string Content { get; set; } = string.Empty;
+        [JsonIgnore]
+        public int AuthorId { get; set; }
     }
 }

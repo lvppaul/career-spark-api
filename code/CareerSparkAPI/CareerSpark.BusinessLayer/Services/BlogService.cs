@@ -3,9 +3,11 @@ using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.DTOs.Update;
 using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.BusinessLayer.Mappings;
+using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Helper;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CareerSpark.BusinessLayer.Services
 {
@@ -149,12 +151,12 @@ namespace CareerSpark.BusinessLayer.Services
                     return false;
                 }
 
-                var deleteResult = await _unitOfWork.BlogRepository.RemoveAsync(existingBlog);
-
-                if (!deleteResult)
+                existingBlog.IsDeleted = true;
+                var updated = await _unitOfWork.BlogRepository.UpdateAsync(existingBlog);
+                if (updated == 0)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
-                    return false;
+                    throw new InvalidOperationException("Failed to delete blog - no changes were saved");
                 }
 
                 await _unitOfWork.CommitTransactionAsync();

@@ -16,6 +16,7 @@ namespace CareerSpark.BusinessLayer.Mappings
                 Id = blog.Id,
                 Title = blog.Title ?? string.Empty,
                 Content = blog.Content ?? string.Empty,
+                AuthorId = blog.AuthorId,
                 CreateAt = blog.CreateAt,
                 UpdatedAt = blog.UpdatedAt
             };
@@ -31,6 +32,7 @@ namespace CareerSpark.BusinessLayer.Mappings
             {
                 Title = request.Title?.Trim(),
                 Content = request.Content?.Trim(),
+                AuthorId = request.AuthorId,
                 CreateAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
