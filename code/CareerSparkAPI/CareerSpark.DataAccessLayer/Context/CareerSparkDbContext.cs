@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +6,7 @@ namespace CareerSpark.DataAccessLayer.Context;
 
 public partial class CareerSparkDbContext : DbContext
 {
-    
+
 
     public CareerSparkDbContext(DbContextOptions<CareerSparkDbContext> options)
         : base(options)
@@ -273,6 +271,7 @@ public partial class CareerSparkDbContext : DbContext
             entity.Property(e => e.Phone).HasMaxLength(20);
             entity.Property(e => e.RefreshToken).HasMaxLength(500);
             entity.Property(e => e.avatarURL).HasMaxLength(255);
+            entity.Property(e => e.avatarPublicId).HasMaxLength(200);
 
             entity.HasOne(d => d.Role)
                 .WithMany(p => p.Users)

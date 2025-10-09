@@ -21,6 +21,7 @@ namespace CareerSpark.BusinessLayer.Mappings
                 CreatedAt = user.CreatedAt,
                 IsActive = user.IsActive,
                 Role = (UserRole)user.RoleId,
+                avatarURL = user.avatarURL
             };
         }
         #endregion
@@ -56,8 +57,6 @@ namespace CareerSpark.BusinessLayer.Mappings
 
             if (!string.IsNullOrWhiteSpace(request.Phone))
                 user.Phone = request.Phone.Trim();
-            if (!string.IsNullOrWhiteSpace(request.avatarURL))
-                user.avatarURL = request.avatarURL.Trim();
 
             user.RoleId = (int)request.RoleId;
             user.IsActive = request.IsActive;
