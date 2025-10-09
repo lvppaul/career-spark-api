@@ -6,6 +6,9 @@
 INSERT INTO "Role" ("RoleName") VALUES 
 ('Admin'), ('User'), ('Moderator');
 
+INSERT INTO "public"."User" ("Id", "Name", "Phone", "Email", "Password", "avatarURL", "RefreshToken", "ExpiredRefreshTokenAt", "IsActive", "CreatedAt", "RoleId")
+VALUES ('1', 'Phát Lê Vĩnh', null, 'levinhphat790@gmail.com', null, null, null, null, 'true', '2025-10-06 17:39:57.748498', '2');
+
 -- Subscription Plans
 INSERT INTO "SubscriptionPlan" ("Name", "Price", "DurationDays", "Description", "Level", "IsActive") VALUES
 ('Free Plan', 0, 30, 'Gói miễn phí cơ bản', 1, TRUE),
