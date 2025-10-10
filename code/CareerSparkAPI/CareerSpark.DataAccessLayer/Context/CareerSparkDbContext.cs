@@ -56,10 +56,12 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_Blogs");
             entity.Property(e => e.Title).HasMaxLength(255);
             entity.Property(e => e.CreateAt)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+            entity.Property(e => e.IsPublished).HasDefaultValue(false);
             entity.Property(e => e.UpdatedAt)
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamp with time zone");
         });
 
         modelBuilder.Entity<CareerField>(entity =>
@@ -112,10 +114,10 @@ public partial class CareerSparkDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_Comments");
             entity.Property(e => e.CreateAt)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(e => e.UpdateAt)
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamp with time zone");
 
             entity.HasOne(d => d.Blog)
                 .WithMany(p => p.Comments)
@@ -148,10 +150,10 @@ public partial class CareerSparkDbContext : DbContext
             entity.Property(e => e.VnPayResponseCode).HasMaxLength(10);
 
             entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
-            entity.Property(e => e.PaidAt).HasColumnType("timestamp without time zone");
-            entity.Property(e => e.ExpiredAt).HasColumnType("timestamp without time zone");
+            entity.Property(e => e.PaidAt).HasColumnType("timestamp with time zone");
+            entity.Property(e => e.ExpiredAt).HasColumnType("timestamp with time zone");
 
             entity.HasOne(d => d.User)
                 .WithMany()
@@ -244,7 +246,7 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_TestSession");
             entity.ToTable("TestSession");
             entity.Property(e => e.StartAt)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.HasOne(d => d.User)
                 .WithMany(p => p.TestSessions)
@@ -260,11 +262,11 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasIndex(e => e.Email, "UQ_User_Email").IsUnique();
 
             entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.ExpiredRefreshTokenAt)
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamp with time zone");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Password).HasMaxLength(255).IsRequired(false);

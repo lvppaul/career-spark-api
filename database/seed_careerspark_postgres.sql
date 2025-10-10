@@ -188,3 +188,17 @@ INSERT INTO "QuestionTest" ("Content","QuestionType") VALUES
 ('Tôi thích làm thư ký', 'Conventional'),
 ('Khi làm toán tôi kiểm tra lại nhiều lần', 'Conventional'),
 ('Tôi thích viết thư', 'Conventional');
+
+--Blogs
+INSERT INTO "Blogs" ("AuthorId", "Title", "Content", "UpdatedAt")
+VALUES
+(1, 'Cách chăm sóc cá Koi mùa mưa', 
+ 'Mùa mưa là thời điểm cá Koi dễ bị stress do thay đổi nhiệt độ và chất lượng nước. Hãy kiểm tra pH, nhiệt độ và oxy thường xuyên để đảm bảo môi trường ổn định.', NULL),
+(1, 'Top 5 loại thức ăn tốt nhất cho cá Koi', 
+ 'Thức ăn có hàm lượng protein cao, dễ tiêu hóa và chứa đầy đủ vitamin là lựa chọn lý tưởng cho cá Koi. Một số thương hiệu nổi bật gồm Hikari, Aqua Master, và JPD.', NULL),
+(1, 'Cách nhận biết cá Koi bị bệnh nấm', 
+ 'Dấu hiệu thường gặp là xuất hiện các đốm trắng, tróc vảy, hoặc bơi lờ đờ. Khi phát hiện, cần cách ly cá bệnh và sử dụng thuốc diệt nấm chuyên dụng.', NULL),
+(1, 'Hướng dẫn thiết kế hồ Koi đúng chuẩn phong thủy', 
+ 'Một hồ Koi đạt chuẩn nên có hình dạng uốn lượn tự nhiên, không có góc nhọn, và hướng nước chảy nhẹ nhàng để mang lại may mắn và thịnh vượng.', NULL),
+(1, 'Cách duy trì màu sắc rực rỡ cho cá Koi', 
+ 'Để cá Koi luôn có màu sắc đẹp, cần cung cấp ánh sáng tự nhiên đủ, chế độ ăn phù hợp và thay nước định kỳ để loại bỏ tạp chất trong hồ.', NULL);
