@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace CareerSpark.BusinessLayer.DTOs.Request
 {
@@ -9,7 +10,7 @@ namespace CareerSpark.BusinessLayer.DTOs.Request
         public int SubscriptionPlanId { get; set; }
 
         [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "UserId must be greater than 0")]
+        [JsonIgnore]
         public int UserId { get; set; }
     }
 }

@@ -47,6 +47,7 @@ namespace CareerSpark.API.Controllers
                     });
                 }
 
+                request.UserId = currentUserId;
                 // Ensure user can only create orders for themselves (unless admin)
                 var userRole = User.FindFirst("Role")?.Value;
                 if (userRole != "Admin" && request.UserId != currentUserId)
@@ -119,9 +120,9 @@ namespace CareerSpark.API.Controllers
                 // Check if user can access this order
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var userRole = User.FindFirst("Role")?.Value;
-                
-                if (userRole != "Admin" && userRole != "Moderator" && 
-                    (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId) || 
+
+                if (userRole != "Admin" && userRole != "Moderator" &&
+                    (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId) ||
                      order.UserId != currentUserId))
                 {
                     return Forbid();
@@ -166,9 +167,9 @@ namespace CareerSpark.API.Controllers
                 // Check if user can access these orders
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var userRole = User.FindFirst("Role")?.Value;
-                
-                if (userRole != "Admin" && userRole != "Moderator" && 
-                    (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId) || 
+
+                if (userRole != "Admin" && userRole != "Moderator" &&
+                    (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId) ||
                      userId != currentUserId))
                 {
                     return Forbid();
