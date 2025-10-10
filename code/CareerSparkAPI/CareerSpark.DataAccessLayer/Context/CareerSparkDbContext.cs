@@ -62,6 +62,7 @@ public partial class CareerSparkDbContext : DbContext
             entity.Property(e => e.IsPublished).HasDefaultValue(false);
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp with time zone");
+            entity.Property(e => e.Tag).HasMaxLength(100);
         });
 
         modelBuilder.Entity<CareerField>(entity =>

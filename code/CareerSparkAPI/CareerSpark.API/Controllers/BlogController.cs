@@ -301,6 +301,88 @@ namespace CareerSpark.API.Controllers
             }
         }
 
+        [Authorize]
+        [HttpGet("BlogUnpublished")]
+        public async Task<IActionResult> GetAllUnpublishedBlogs()
+        {
+            try
+            {
+                var blogs = await _blogService.GetUnpublishedBlogsAsync();
+                return Ok(new
+                {
+                    success = true,
+                    message = "Successfully retrieved all unpublished blogs",
+                    data = blogs,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving unpublished blogs",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [Authorize]
+        [HttpGet("BlogUnpublishedPagination")]
+        public async Task<IActionResult> GetAllUnpublishedBlogsWithPagination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var pagination = new Pagination(pageNumber, pageSize);
+                var result = await _blogService.GetUnpublishedBlogsAsyncWithPagination(pagination);
+
+                if (pageNumber > result.TotalPages)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = $"Requested page {pageNumber} exceeds total available pages",
+                        details = new
+                        {
+                            requestedPage = pageNumber,
+                            totalPages = result.TotalPages,
+                            totalCount = result.TotalCount,
+                            pageSize = result.PageSize,
+                        },
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Successfully retrieved {result.Items.Count()} unpublished blogs from page {result.PageNumber} of {result.TotalPages}",
+                    data = result.Items,
+                    pagination = new
+                    {
+                        totalCount = result.TotalCount,
+                        pageNumber = result.PageNumber,
+                        pageSize = result.PageSize,
+                        totalPages = result.TotalPages,
+                        hasPrevious = result.HasPrevious,
+                        hasNext = result.HasNext,
+                    },
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving unpublished blogs with pagination",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
         [Authorize(Roles = "User")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBlog(int id)

@@ -38,8 +38,8 @@ namespace CareerSpark.DataAccessLayer.Repositories
         public override async Task<PaginatedResult<Blog>> GetAllAsyncWithPagination(Pagination pagination)
         {
             var query = BaseBlogQuery();
-            // Get total count
-            var totalCount = await _context.Blogs.CountAsync();
+            // Get total count for the filtered query
+            var totalCount = await query.CountAsync();
 
             // Get paginated items with Comments included
             var items = await query
@@ -84,6 +84,32 @@ namespace CareerSpark.DataAccessLayer.Repositories
             return BaseBlogQuery()
                 .OrderByDescending(b => b.CreateAt)
                 .ToListAsync();
+        }
+
+        public Task<List<Blog>> GetUnpublishedBlogsAsync()
+        {
+            return _context.Blogs
+                .Include(b => b.Comments)
+                .Where(b => !b.IsDeleted && !b.IsPublished)
+                .OrderByDescending(b => b.CreateAt)
+                .ToListAsync();
+        }
+
+        public async Task<PaginatedResult<Blog>> GetUnpublishedBlogsAsyncWithPagination(Pagination pagination)
+        {
+            var query = _context.Blogs
+                .Include(b => b.Comments)
+                .Where(b => !b.IsDeleted && !b.IsPublished);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(b => b.CreateAt)
+                .Skip(pagination.Skip)
+                .Take(pagination.Take)
+                .ToListAsync();
+
+            return new PaginatedResult<Blog>(items, totalCount, pagination.PageNumber, pagination.PageSize);
         }
     }
 }

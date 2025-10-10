@@ -17,6 +17,8 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<IEnumerable<BlogResponse>> GetBlogsByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<IEnumerable<BlogResponse>> GetRecentBlogsAsync(int count = 10);
         Task<IEnumerable<BlogResponse>> GetPublishedBlogsAsync();
+        Task<IEnumerable<BlogResponse>> GetUnpublishedBlogsAsync();
+        Task<PaginatedResult<BlogResponse>> GetUnpublishedBlogsAsyncWithPagination(Pagination pagination);
         Task<bool> UpdateBlogPublishedAsync(int id);
         Task<bool> UpdateBlogUnpublishedAsync(int id);
         Task<bool> UpdateBlogDeletedAsync(int id);
