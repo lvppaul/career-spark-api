@@ -77,7 +77,7 @@ namespace CareerSpark.API.Controllers
         /// </summary>
         /// <param name="id">The ID of the user</param>
         /// <returns>User object</returns>
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize(Roles = "Admin,Moderator,User")]
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(User), 200)]   // success
         [ProducesResponseType(400)]                 // bad request
@@ -237,7 +237,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdate userUpdate)
         {
