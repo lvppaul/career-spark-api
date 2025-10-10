@@ -55,7 +55,7 @@ namespace CareerSpark.BusinessLayer.Services
                     new Claim(JwtRegisteredClaimNames.Name, user.Name),
                     new Claim(JwtRegisteredClaimNames.Email, email),
                     new Claim("Role", roleName),
-                    new Claim ("avatarURL", user.avatarURL)
+                    new Claim ("avatarURL", user.avatarURL ?? string.Empty)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(_expiryMinutes),
                 Issuer = _issuer,
@@ -629,7 +629,7 @@ namespace CareerSpark.BusinessLayer.Services
                         IsActive = true,
                         RoleId = 2,
                         CreatedAt = DateTime.UtcNow,
-                        avatarURL = userInfo.Picture 
+                        avatarURL = userInfo.Picture
                     };
 
                     _unitOfWork.UserRepository.PrepareCreate(user);
