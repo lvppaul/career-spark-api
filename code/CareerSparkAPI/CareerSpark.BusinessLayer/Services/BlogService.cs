@@ -201,6 +201,38 @@ namespace CareerSpark.BusinessLayer.Services
             return blogs.Select(BlogMapper.ToResponse).ToList();
         }
 
+        public async Task<IEnumerable<BlogResponse>> GetUnpublishedBlogsAsync()
+        {
+            var blogs = await _unitOfWork.BlogRepository.GetUnpublishedBlogsAsync();
+            if (blogs == null || !blogs.Any())
+                return Enumerable.Empty<BlogResponse>();
+            return blogs.Select(BlogMapper.ToResponse).ToList();
+        }
+
+        public async Task<PaginatedResult<BlogResponse>> GetUnpublishedBlogsAsyncWithPagination(Pagination pagination)
+        {
+            var result = await _unitOfWork.BlogRepository.GetUnpublishedBlogsAsyncWithPagination(pagination);
+
+            if (result.Items == null || !result.Items.Any())
+            {
+                return new PaginatedResult<BlogResponse>(
+                    Enumerable.Empty<BlogResponse>(),
+                    0,
+                    pagination.PageNumber,
+                    pagination.PageSize
+                );
+            }
+
+            var blogResponses = result.Items.Select(BlogMapper.ToResponse).ToList();
+
+            return new PaginatedResult<BlogResponse>(
+                blogResponses,
+                result.TotalCount,
+                result.PageNumber,
+                result.PageSize
+            );
+        }
+
         public async Task<bool> UpdateBlogPublishedAsync(int id)
         {
             var blog = await _unitOfWork.BlogRepository.GetByIdAsync(id);

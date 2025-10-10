@@ -15,6 +15,7 @@ namespace CareerSpark.BusinessLayer.Mappings
             {
                 Id = blog.Id,
                 Title = blog.Title ?? string.Empty,
+                Tag = blog.Tag ?? string.Empty,
                 Content = blog.Content ?? string.Empty,
                 AuthorId = blog.AuthorId,
                 CreateAt = blog.CreateAt,
@@ -31,6 +32,7 @@ namespace CareerSpark.BusinessLayer.Mappings
             return new Blog
             {
                 Title = request.Title?.Trim(),
+                Tag = request.Tag?.Trim() ?? string.Empty,
                 Content = request.Content?.Trim(),
                 AuthorId = request.AuthorId,
                 CreateAt = DateTime.UtcNow,
@@ -46,6 +48,9 @@ namespace CareerSpark.BusinessLayer.Mappings
 
             if (!string.IsNullOrWhiteSpace(request.Title))
                 blog.Title = request.Title.Trim();
+
+            if (!string.IsNullOrWhiteSpace(request.Tag))
+                blog.Tag = request.Tag.Trim();
 
             if (!string.IsNullOrWhiteSpace(request.Content))
                 blog.Content = request.Content.Trim();

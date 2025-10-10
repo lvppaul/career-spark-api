@@ -8,9 +8,9 @@ public partial class Blog
     public int Id { get; set; }
     public int AuthorId { get; set; }
     public string Title { get; set; } = null!;
-
+    public string Tag { get; set; } = null!;
     public string Content { get; set; } = null!;
-
+    
     public DateTime? CreateAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
