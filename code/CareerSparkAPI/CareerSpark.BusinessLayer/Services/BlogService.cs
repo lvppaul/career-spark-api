@@ -3,9 +3,11 @@ using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.DTOs.Update;
 using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.BusinessLayer.Mappings;
+using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Helper;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CareerSpark.BusinessLayer.Services
 {
@@ -149,12 +151,12 @@ namespace CareerSpark.BusinessLayer.Services
                     return false;
                 }
 
-                var deleteResult = await _unitOfWork.BlogRepository.RemoveAsync(existingBlog);
-
-                if (!deleteResult)
+                existingBlog.IsDeleted = true;
+                var updated = await _unitOfWork.BlogRepository.UpdateAsync(existingBlog);
+                if (updated == 0)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
-                    return false;
+                    throw new InvalidOperationException("Failed to delete blog - no changes were saved");
                 }
 
                 await _unitOfWork.CommitTransactionAsync();
@@ -197,6 +199,38 @@ namespace CareerSpark.BusinessLayer.Services
             if (blogs == null || !blogs.Any())
                 return Enumerable.Empty<BlogResponse>();
             return blogs.Select(BlogMapper.ToResponse).ToList();
+        }
+
+        public async Task<IEnumerable<BlogResponse>> GetUnpublishedBlogsAsync()
+        {
+            var blogs = await _unitOfWork.BlogRepository.GetUnpublishedBlogsAsync();
+            if (blogs == null || !blogs.Any())
+                return Enumerable.Empty<BlogResponse>();
+            return blogs.Select(BlogMapper.ToResponse).ToList();
+        }
+
+        public async Task<PaginatedResult<BlogResponse>> GetUnpublishedBlogsAsyncWithPagination(Pagination pagination)
+        {
+            var result = await _unitOfWork.BlogRepository.GetUnpublishedBlogsAsyncWithPagination(pagination);
+
+            if (result.Items == null || !result.Items.Any())
+            {
+                return new PaginatedResult<BlogResponse>(
+                    Enumerable.Empty<BlogResponse>(),
+                    0,
+                    pagination.PageNumber,
+                    pagination.PageSize
+                );
+            }
+
+            var blogResponses = result.Items.Select(BlogMapper.ToResponse).ToList();
+
+            return new PaginatedResult<BlogResponse>(
+                blogResponses,
+                result.TotalCount,
+                result.PageNumber,
+                result.PageSize
+            );
         }
 
         public async Task<bool> UpdateBlogPublishedAsync(int id)

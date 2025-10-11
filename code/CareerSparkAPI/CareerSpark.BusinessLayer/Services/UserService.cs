@@ -6,6 +6,7 @@ using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Enums;
 using CareerSpark.DataAccessLayer.Helper;
 using CareerSpark.DataAccessLayer.UnitOfWork;
+using Microsoft.AspNetCore.Http;
 using System.Net.Mail;
 
 namespace CareerSpark.BusinessLayer.Services
@@ -13,9 +14,11 @@ namespace CareerSpark.BusinessLayer.Services
     public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public UserService(IUnitOfWork unitOfWork)
+        private readonly ICloudinaryService _cloudinaryService;
+        public UserService(IUnitOfWork unitOfWork, ICloudinaryService cloudinaryService)
         {
             _unitOfWork = unitOfWork;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<IEnumerable<UserResponse>> GetAllAsync()
@@ -322,6 +325,57 @@ namespace CareerSpark.BusinessLayer.Services
                 }
             }
 
+        }
+
+        public async Task<bool> UpdateAvatar(int userId, IFormFile avatarImage)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+            if (user == null)
+                return false;
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+                // Validate file
+                var (isValid, errorMessage) = _cloudinaryService.ValidateDocumentFile(avatarImage);
+                if (!isValid)
+                {
+                    throw new InvalidOperationException("Wrong Image Extension");
+                }
+                // Upload new avatar
+                var avatarUploadResult = await _cloudinaryService.UploadFileAsync(avatarImage, "AvatarImages");
+                if (avatarUploadResult == null || string.IsNullOrWhiteSpace(avatarUploadResult.PublicId))
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw new InvalidOperationException("Avatar upload failed");
+                }
+                // Xoá avatar cũ trên Cloudinary nếu có
+                if (!string.IsNullOrWhiteSpace(user.avatarPublicId))
+                {
+                    var deleteResult = await _cloudinaryService.DeleteFileAsync(user.avatarPublicId);
+                    if (!deleteResult)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        throw new InvalidOperationException("Failed to delete old avatar from Cloudinary");
+                    }
+                }
+                // Cập nhật avatar mới cho user
+                user.avatarURL = avatarUploadResult.SecureUrl;
+                user.avatarPublicId = avatarUploadResult.PublicId;
+
+                var updateResult = await _unitOfWork.UserRepository.UpdateAsync(user);
+                if (updateResult == 0)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw new InvalidOperationException("Failed to update user avatar - no changes were saved");
+                }
+                await _unitOfWork.CommitTransactionAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
         }
     }
 }

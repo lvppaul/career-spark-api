@@ -1,6 +1,7 @@
 ﻿using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.DTOs.Update;
 using CareerSpark.DataAccessLayer.Helper;
+using Microsoft.AspNetCore.Http;
 
 namespace CareerSpark.BusinessLayer.Interfaces
 {
@@ -15,5 +16,7 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<bool> SetActive(int userId);
         Task<bool> Deactive(int userId);
         Task<UserResponse> UpdateAsync(int id, UserUpdate user);
+
+        Task<bool> UpdateAvatar(int userId, IFormFile avatarImage);
     }
 }

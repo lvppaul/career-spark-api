@@ -10,6 +10,7 @@ namespace CareerSpark.BusinessLayer.DTOs.Response
         public string? Phone { get; set; }
         public DateTime? CreatedAt { get; set; }
         public bool? IsActive { get; set; }
+        public string? avatarURL { get; set; }
         public UserRole Role { get; set; }
     }
 }

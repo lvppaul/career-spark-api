@@ -8,7 +8,6 @@ using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Net.Mail;
 using System.Security.Claims;
@@ -40,6 +39,8 @@ namespace CareerSpark.BusinessLayer.Services
             _expiryMinutes = int.Parse(configuration["JwtSettings:ExpiryMinutes"] ?? "30");
         }
 
+
+        //GenerateAccessToken
         public string GenerateAccessToken(User user, string roleName)
         {
             var secretKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_secretKey));
@@ -53,7 +54,8 @@ namespace CareerSpark.BusinessLayer.Services
                     new Claim(JwtRegisteredClaimNames.Sub , user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Name, user.Name),
                     new Claim(JwtRegisteredClaimNames.Email, email),
-                    new Claim("Role", roleName)
+                    new Claim("Role", roleName),
+                    new Claim ("avatarURL", user.avatarURL ?? string.Empty)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(_expiryMinutes),
                 Issuer = _issuer,
@@ -68,6 +70,7 @@ namespace CareerSpark.BusinessLayer.Services
             return token;
         }
 
+        //GenerateRefreshToken
         public string GenerateRefreshToken()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
@@ -590,54 +593,56 @@ namespace CareerSpark.BusinessLayer.Services
                 var client = _httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", request.AccessToken);
 
-                // Gọi Google API để lấy thông tin user
                 var response = await client.GetAsync("https://www.googleapis.com/oauth2/v3/userinfo");
-                if (!response.IsSuccessStatusCode) return new AuthenticationResponse
+                if (!response.IsSuccessStatusCode)
                 {
-                    Success = false,
-                    Message = "Invalid Google access token"
-                };
-
+                    return new AuthenticationResponse
+                    {
+                        Success = false,
+                        Message = "Invalid Google access token"
+                    };
+                }
 
                 var content = await response.Content.ReadAsStringAsync();
                 var userInfo = JsonSerializer.Deserialize<GoogleUserInfo>(content);
 
                 if (userInfo == null || string.IsNullOrEmpty(userInfo.Email))
-                    return  new AuthenticationResponse
+                {
+                    return new AuthenticationResponse
                     {
                         Success = false,
                         Message = "Failed to retrieve user info from Google"
                     };
+                }
 
                 var user = await _unitOfWork.UserRepository.GetByEmailAsync(userInfo.Email);
-                string accessToken = string.Empty;
-                string refreshToken = string.Empty;
                 if (user == null)
                 {
-                    // Tạo tài khoản mới nếu chưa có trong hệ thống
+                    //  Tạo mới user với avatar từ Google
                     user = new User
                     {
                         Name = userInfo.Name,
                         Email = userInfo.Email,
                         IsActive = true,
-                        RoleId = 2, // Mặc định là role User
-                        CreatedAt = DateTime.UtcNow
+                        RoleId = 2,
+                        CreatedAt = DateTime.UtcNow,
+                        avatarURL = userInfo.Picture
                     };
+
                     _unitOfWork.UserRepository.PrepareCreate(user);
                     await _unitOfWork.SaveAsync();
-                    // Lấy user vừa tạo để có ID
-                    var createdUser = await _unitOfWork.UserRepository.GetByEmailAsync(userInfo.Email);
-                    if (createdUser == null)
-                    {
-                        throw new Exception("Failed to retrieve created user");
-                    }
-                    var roleName = "User";
-                    accessToken = GenerateAccessToken(createdUser, roleName);
-                    refreshToken = GenerateRefreshToken();
                 }
                 else
                 {
-                    if (user.IsActive != true)
+                    //  Nếu user chưa có avatar thì cập nhật từ Google
+                    if (string.IsNullOrEmpty(user.avatarURL) && !string.IsNullOrEmpty(userInfo.Picture))
+                    {
+                        user.avatarURL = userInfo.Picture;
+                        _unitOfWork.UserRepository.PrepareUpdate(user);
+                        await _unitOfWork.SaveAsync();
+                    }
+
+                    if (!user.IsActive)
                     {
                         return new AuthenticationResponse
                         {
@@ -645,14 +650,20 @@ namespace CareerSpark.BusinessLayer.Services
                             Message = "Account is inactive"
                         };
                     }
-                    else
-                    {
-                        string roleName = user.Role?.RoleName ?? "User";
-                        accessToken = GenerateAccessToken(user, roleName);
-                        refreshToken = GenerateRefreshToken();
-                    }
                 }
 
+                string roleName = user.Role?.RoleName ?? "User";
+
+                // Generate tokens
+                var accessToken = GenerateAccessToken(user, roleName);
+                var refreshToken = GenerateRefreshToken();
+                var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+                // Persist refresh token like normal login
+                user.RefreshToken = refreshToken;
+                user.ExpiredRefreshTokenAt = refreshTokenExpiry;
+                _unitOfWork.UserRepository.PrepareUpdate(user);
+                await _unitOfWork.SaveAsync();
 
                 return new AuthenticationResponse
                 {
@@ -660,20 +671,20 @@ namespace CareerSpark.BusinessLayer.Services
                     Message = "Google login successful",
                     Data = new AuthenticationData
                     {
-                       AccessToken = accessToken,
-                       RefreshToken = refreshToken,
-
+                        AccessToken = accessToken,
+                        RefreshToken = refreshToken
                     }
                 };
             }
             catch (Exception ex)
             {
-               return new AuthenticationResponse
+                return new AuthenticationResponse
                 {
                     Success = false,
                     Message = $"Google login failed: {ex.Message}"
                 };
             }
         }
+
     }
 }

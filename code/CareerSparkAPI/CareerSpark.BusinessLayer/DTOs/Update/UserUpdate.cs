@@ -15,6 +15,5 @@ namespace CareerSpark.BusinessLayer.DTOs.Update
         public UserRole RoleId { get; set; }
         [Required(ErrorMessage = "Status is required")]
         public bool IsActive { get; set; }
-        public string? avatarURL { get; set; }
     }
 }
