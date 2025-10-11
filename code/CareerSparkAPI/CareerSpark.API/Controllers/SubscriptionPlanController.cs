@@ -17,7 +17,7 @@ namespace CareerSpark.API.Controllers
             _subscriptionPlanService = subscriptionPlanService;
         }
 
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllSubscriptionPlans()
         {
