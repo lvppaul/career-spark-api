@@ -7,7 +7,7 @@ namespace CareerSpark.BusinessLayer.Interfaces
 {
     public interface IAuthenticationService
     {
-        string GenerateAccessToken(User user, string roleName);
+        string GenerateAccessToken(User user, string roleName, string activeLevelPlan);
         string GenerateRefreshToken();
         Task<ClaimsPrincipal?> ValidateToken(string token);
 
@@ -16,5 +16,13 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<AuthenticationResponse?> RegisterAsync(UserRequest request);
         Task<AuthenticationResponse?> LogoutAsync(LogoutRequest request);
         Task<AuthenticationResponse> LoginWithGoogle(GoogleAccessTokenRequest request);
+
+        Task<bool> VerifyEmailAsync(ResendVerifyRequest request, CancellationToken cancellationToken);
+        Task<AuthenticationResponse> ConfirmEmailAsync(ConfirmEmailRequest request);
+
+        Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken);
+        Task<AuthenticationResponse> ResetPasswordAsync(ResetPasswordRequest request);
+
+        //  Task<bool> ResendVerifyAsync(ResendVerifyRequest request, CancellationToken cancellationToken);
     }
 }

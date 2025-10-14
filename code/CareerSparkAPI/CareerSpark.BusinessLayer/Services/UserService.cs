@@ -1,5 +1,6 @@
 ﻿using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.DTOs.Update;
+using CareerSpark.BusinessLayer.Extensions;
 using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.BusinessLayer.Mappings;
 using CareerSpark.DataAccessLayer.Entities;
@@ -117,6 +118,7 @@ namespace CareerSpark.BusinessLayer.Services
                     await _unitOfWork.RollbackTransactionAsync();
                     return true; // User đã active rồi, không cần làm gì thêm
                 }
+                user.InvalidateAllTokens(); // Cập nhật SecurityStamp khi thay đổi trạng thái
                 await _unitOfWork.UserRepository.SetActive(user);
                 await _unitOfWork.CommitTransactionAsync();
                 return true;
@@ -158,6 +160,7 @@ namespace CareerSpark.BusinessLayer.Services
                     await _unitOfWork.RollbackTransactionAsync();
                     return true; // User đã deactive rồi, không cần làm gì thêm
                 }
+                user.InvalidateAllTokens(); // Cập nhật SecurityStamp khi thay đổi trạng thái
                 await _unitOfWork.UserRepository.DeActive(user);
                 await _unitOfWork.CommitTransactionAsync();
                 return true;
@@ -217,8 +220,45 @@ namespace CareerSpark.BusinessLayer.Services
                 // Validate update data
                 await ValidateUserUpdate(id, userUpdate, existingUser);
 
+                // Kiểm tra xem có thay đổi quan trọng nào cần cập nhật SecurityStamp không
+                bool needsSecurityStampUpdate = false;
+
+                // Thay đổi Email
+                if (!string.IsNullOrWhiteSpace(userUpdate.Email) &&
+                    !userUpdate.Email.Equals(existingUser.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    needsSecurityStampUpdate = true;
+                }
+
+                // Thay đổi Phone  
+                if (!string.IsNullOrWhiteSpace(userUpdate.Phone) &&
+                    !userUpdate.Phone.Equals(existingUser.Phone))
+                {
+                    needsSecurityStampUpdate = true;
+                }
+
+                // Thay đổi Role
+                if ((int)userUpdate.RoleId != existingUser.RoleId)
+                {
+                    needsSecurityStampUpdate = true;
+                }
+
+                // Thay đổi IsActive
+                if (userUpdate.IsActive != existingUser.IsActive)
+                {
+                    needsSecurityStampUpdate = true;
+                }
+
+
                 // Map về lại Entity
                 UserMapper.ToUpdate(userUpdate, existingUser);
+
+                // Cập nhật SecurityStamp nếu cần
+                if (needsSecurityStampUpdate)
+                {
+                    existingUser.InvalidateAllTokens();
+                }
+
 
                 var updateResult = await _unitOfWork.UserRepository.UpdateAsync(existingUser);
 
