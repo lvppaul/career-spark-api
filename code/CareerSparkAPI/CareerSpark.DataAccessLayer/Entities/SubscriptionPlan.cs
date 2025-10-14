@@ -11,6 +11,7 @@ public partial class SubscriptionPlan
     public int DurationDays { get; set; }
 
     public string? Description { get; set; }
+    public string? Benefits { get; set; }
 
     public int Level { get; set; }
 

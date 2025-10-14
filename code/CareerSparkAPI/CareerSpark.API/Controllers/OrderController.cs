@@ -50,7 +50,7 @@ namespace CareerSpark.API.Controllers
                 request.UserId = currentUserId;
                 // Ensure user can only create orders for themselves (unless admin)
                 var userRole = User.FindFirst("Role")?.Value;
-                if (userRole != "Admin" && request.UserId != currentUserId)
+                if (userRole == "Admin" && request.UserId != currentUserId)
                 {
                     return Forbid();
                 }
