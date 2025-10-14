@@ -1,9 +1,9 @@
 -- ========================================
 -- DROP & CREATE DATABASE (chạy riêng nếu cần)
 -- ========================================
--- DROP DATABASE IF EXISTS "CareerSparkDB";
--- CREATE DATABASE "CareerSparkDB";
--- \c CareerSparkDB
+ --DROP DATABASE IF EXISTS "CareerSparkDB";
+ --CREATE DATABASE "CareerSparkDB";
+ --\c CareerSparkDB
 
 -- ========================================
 -- CREATE TABLES
@@ -25,8 +25,11 @@ CREATE TABLE "User" (
     "Password" VARCHAR(255),
     "RefreshToken" VARCHAR(500),
     "ExpiredRefreshTokenAt" TIMESTAMPTZ,
-    "AvatarURL" VARCHAR(255),
+    "avatarURL" VARCHAR(255),
+	"avatarPublicId" VARCHAR(200),
     "IsActive" BOOLEAN NOT NULL DEFAULT TRUE,
+	"IsVerified" BOOLEAN NOT NULL DEFAULT FALSE,
+	"SecurityStamp" VARCHAR(100) NOT NULL,
     "CreatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "RoleId" INT NOT NULL REFERENCES "Role"("Id") ON DELETE CASCADE
 );
@@ -129,6 +132,7 @@ CREATE TABLE "SubscriptionPlan" (
     "Price" DECIMAL(18,2) NOT NULL,
     "DurationDays" INT NOT NULL,
     "Description" TEXT,
+	"Benefits" TEXT,
     "Level" INT NOT NULL,
     "IsActive" BOOLEAN NOT NULL DEFAULT TRUE
 );
