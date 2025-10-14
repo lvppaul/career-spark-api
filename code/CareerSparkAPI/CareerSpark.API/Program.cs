@@ -100,6 +100,7 @@ namespace CareerSpark.API
             builder.Services.AddScoped<IUserSubscriptionService, UserSubscriptionService>();
             builder.Services.AddScoped<ITestService, TestService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddScoped<INewsService, NewsService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 
             builder.Services.AddCors(options =>

@@ -45,6 +45,8 @@ public partial class CareerSparkDbContext : DbContext
 
     public virtual DbSet<UserSubscription> UserSubscriptions { get; set; }
 
+    public virtual DbSet<News> News { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -70,6 +72,20 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_CareerField");
             entity.ToTable("CareerField");
             entity.Property(e => e.Name).HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<News>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_News");
+            entity.ToTable("News");
+            entity.Property(e => e.Title).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.Content).IsRequired();
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp with time zone")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.ImageUrl).HasMaxLength(255);
+            entity.Property(e => e.avatarPublicId).HasMaxLength(200);
         });
 
         modelBuilder.Entity<CareerMapping>(entity =>

@@ -664,9 +664,6 @@ namespace CareerSpark.BusinessLayer.Services
                 }
 
                 var user = await _unitOfWork.UserRepository.GetByEmailAsync(userInfo.Email);
-                string accessToken;
-                string refreshToken;
-
                 if (user == null)
                 {
                     //  Tạo mới user với avatar từ Google
@@ -708,8 +705,17 @@ namespace CareerSpark.BusinessLayer.Services
                 var activeSubscription = await _userSubscriptionService.GetActiveSubscriptionByUserIdAsync(user.Id);
                 var activeLevelPlan = activeSubscription?.Level ?? 0;
                 string roleName = user.Role?.RoleName ?? "User";
-                accessToken = GenerateAccessToken(user, roleName, activeLevelPlan.ToString());
-                refreshToken = GenerateRefreshToken();
+
+                // Generate tokens
+                var accessToken = GenerateAccessToken(user, roleName, activeLevelPlan.ToString());
+                var refreshToken = GenerateRefreshToken();
+                var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+                // Persist refresh token like normal login
+                user.RefreshToken = refreshToken;
+                user.ExpiredRefreshTokenAt = refreshTokenExpiry;
+                _unitOfWork.UserRepository.PrepareUpdate(user);
+                await _unitOfWork.SaveAsync();
 
                 return new AuthenticationResponse
                 {

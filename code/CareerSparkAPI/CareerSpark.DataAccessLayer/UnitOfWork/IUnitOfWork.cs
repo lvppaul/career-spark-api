@@ -25,8 +25,9 @@ namespace CareerSpark.DataAccessLayer.UnitOfWork
 
     
         IOrderRepository OrderRepository { get; }
-      
-        
+        INewsRepository NewsRepository { get; }
+
+
         // Transaction management
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

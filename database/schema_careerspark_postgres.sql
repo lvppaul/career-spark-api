@@ -168,3 +168,14 @@ CREATE TABLE "Orders" (
     "PaidAt" TIMESTAMPTZ,
     "ExpiredAt" TIMESTAMPTZ
 );
+
+--News
+CREATE TABLE "News" (
+    "Id" SERIAL PRIMARY KEY,
+    "Title" VARCHAR(255) NOT NULL,
+    "Content" TEXT NOT NULL,
+    "CreatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "IsActive" BOOLEAN NOT NULL DEFAULT TRUE,
+    "ImageUrl" VARCHAR(255),
+    "avatarPublicId" VARCHAR(200)
+);
