@@ -12,6 +12,7 @@ namespace CareerSpark.BusinessLayer.DTOs.Request
     {
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
+        public string? Tag { get; set; }
         public IFormFile? ImageFile { get; set; }
         public string? ImageUrl { get; set; }
         public string? avatarPublicId { get; set; }

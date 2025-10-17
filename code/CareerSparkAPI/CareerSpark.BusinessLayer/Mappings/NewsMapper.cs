@@ -1,5 +1,4 @@
-﻿
-using CareerSpark.BusinessLayer.DTOs.Request;
+﻿using CareerSpark.BusinessLayer.DTOs.Request;
 using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.DataAccessLayer.Entities;
 using System;
@@ -20,6 +19,7 @@ namespace CareerSpark.BusinessLayer.Mappings
             {
                 Id = news.Id,
                 Title = news.Title ?? string.Empty,
+                Tag = news.Tag,
                 Content = news.Content ?? string.Empty,
                 CreatedAt = news.CreatedAt,
                 avatarPublicId = news.avatarPublicId,
@@ -37,6 +37,7 @@ namespace CareerSpark.BusinessLayer.Mappings
             return new News
             {
                 Title = request.Title?.Trim(),
+                Tag = request.Tag?.Trim(),
                 Content = request.Content?.Trim(),
                 ImageUrl = request.ImageUrl?.Trim(),
                 avatarPublicId = request.avatarPublicId?.Trim(),
