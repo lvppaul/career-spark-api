@@ -1,6 +1,7 @@
 using CareerSpark.BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CareerSpark.API.Controllers
 {
@@ -192,11 +193,12 @@ namespace CareerSpark.API.Controllers
         }
 
         [Authorize]
-        [HttpGet("userId/{userId}/active-subscription")]
-        public async Task<IActionResult> GetMyActiveSubscription(int userId)
+        [HttpGet("my-active-subscription")]
+        public async Task<IActionResult> GetMyActiveSubscription()
         {
             try
             {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 var subscription = await _userSubscriptionService.GetActiveSubscriptionByUserIdAsync(userId);
 
                 if (subscription == null)
@@ -314,11 +316,11 @@ namespace CareerSpark.API.Controllers
 
         [Authorize]
         [HttpGet("my-status")]
-        public async Task<IActionResult> CheckMySubscriptionStatus(int userId)
+        public async Task<IActionResult> CheckMySubscriptionStatus()
         {
             try
             {
-
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 var isActive = await _userSubscriptionService.IsUserSubscriptionActiveAsync(userId);
 
                 return Ok(new

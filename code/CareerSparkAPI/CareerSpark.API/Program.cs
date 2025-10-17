@@ -1,3 +1,4 @@
+using CareerSpark.API.Middleware;
 using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.BusinessLayer.Services;
 using CareerSpark.DataAccessLayer.Context;
@@ -100,6 +101,7 @@ namespace CareerSpark.API
             builder.Services.AddScoped<ITestService, TestService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             builder.Services.AddScoped<INewsService, NewsService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             builder.Services.AddCors(options =>
             {
@@ -133,7 +135,6 @@ namespace CareerSpark.API
             builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
             builder.Services.AddHttpClient();
-           
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -152,6 +153,7 @@ namespace CareerSpark.API
             app.UseRouting();
             app.UseCors("AllowAllOrigins");
             app.UseAuthentication();
+            app.UseMiddleware<SecurityStampValidationMiddleware>();
             app.UseAuthorization();
             app.MapControllers();
             app.MapHealthChecks("/health");

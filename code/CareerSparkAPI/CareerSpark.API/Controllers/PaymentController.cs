@@ -1,5 +1,4 @@
-﻿using CareerSpark.BusinessLayer.DTOs.Request;
-using CareerSpark.BusinessLayer.Interfaces;
+﻿using CareerSpark.BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CareerSpark.API.Controllers
@@ -21,41 +20,41 @@ namespace CareerSpark.API.Controllers
             _logger = logger;
         }
 
-        [HttpPost("CreatePaymentUrlVnpay")]
-        public async Task<IActionResult> CreatePaymentUrlVnpay(PaymentInformationModel model)
-        {
-            try
-            {
-                var url = await _vnPayService.CreatePaymentUrl(model, HttpContext);
-                if (string.IsNullOrEmpty(url))
-                {
-                    return BadRequest(new
-                    {
-                        success = false,
-                        message = "Cannot create payment url",
-                        timestamp = DateTime.UtcNow
-                    });
-                }
+        //[HttpPost("CreatePaymentUrlVnpay")]
+        //public async Task<IActionResult> CreatePaymentUrlVnpay(PaymentInformationModel model)
+        //{
+        //    try
+        //    {
+        //        var url = await _vnPayService.CreatePaymentUrl(model, HttpContext);
+        //        if (string.IsNullOrEmpty(url))
+        //        {
+        //            return BadRequest(new
+        //            {
+        //                success = false,
+        //                message = "Cannot create payment url",
+        //                timestamp = DateTime.UtcNow
+        //            });
+        //        }
 
-                return Ok(new
-                {
-                    success = true,
-                    message = "Payment URL created successfully",
-                    paymentUrl = url,
-                    timestamp = DateTime.UtcNow
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Error creating payment URL",
-                    error = ex.Message,
-                    timestamp = DateTime.UtcNow
-                });
-            }
-        }
+        //        return Ok(new
+        //        {
+        //            success = true,
+        //            message = "Payment URL created successfully",
+        //            paymentUrl = url,
+        //            timestamp = DateTime.UtcNow
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new
+        //        {
+        //            success = false,
+        //            message = "Error creating payment URL",
+        //            error = ex.Message,
+        //            timestamp = DateTime.UtcNow
+        //        });
+        //    }
+        //}
 
         // -------------------- Xử lý callback từ VNPay --------------------
         [HttpGet("Checkout/PaymentCallbackVnpay")]

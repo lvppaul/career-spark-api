@@ -14,7 +14,8 @@ namespace CareerSpark.BusinessLayer.Mappings
                 Price = subscriptionPlanRequest.Price,
                 Level = subscriptionPlanRequest.Level,
                 DurationDays = subscriptionPlanRequest.DurationDays,
-                Description = subscriptionPlanRequest.Description
+                Description = subscriptionPlanRequest.Description,
+                Benefits = subscriptionPlanRequest.Benefits
             };
         }
 
@@ -27,7 +28,8 @@ namespace CareerSpark.BusinessLayer.Mappings
                 Price = subscriptionPlan.Price,
                 Level = subscriptionPlan.Level,
                 DurationDays = subscriptionPlan.DurationDays,
-                Description = subscriptionPlan.Description
+                Description = subscriptionPlan.Description,
+                Benefits = subscriptionPlan.Benefits ?? string.Empty
             };
         }
 
@@ -42,11 +44,12 @@ namespace CareerSpark.BusinessLayer.Mappings
             {
                 Id = userSubscription.Id,
                 UserId = userSubscription.UserId,
-                UserName = userSubscription.User?.Name ?? string.Empty,
                 PlanId = userSubscription.PlanId,
                 PlanName = userSubscription.Plan?.Name ?? string.Empty,
                 PlanPrice = userSubscription.Plan?.Price ?? 0,
                 PlanDurationDays = userSubscription.Plan?.DurationDays ?? 0,
+                Level = userSubscription.Plan?.Level ?? 0,
+                Benefits = userSubscription.Plan?.Benefits ?? string.Empty,
                 StartDate = userSubscription.StartDate,
                 EndDate = userSubscription.EndDate,
                 IsActive = userSubscription.IsActive

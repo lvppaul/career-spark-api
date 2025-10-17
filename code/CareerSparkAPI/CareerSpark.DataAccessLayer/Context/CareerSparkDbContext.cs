@@ -219,6 +219,7 @@ public partial class CareerSparkDbContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
             entity.Property(e => e.Level).IsRequired();
+            entity.Property(e => e.Benefits).HasColumnType("text");
         });
 
         modelBuilder.Entity<TestAnswer>(entity =>
@@ -292,6 +293,8 @@ public partial class CareerSparkDbContext : DbContext
             entity.Property(e => e.RefreshToken).HasMaxLength(500);
             entity.Property(e => e.avatarURL).HasMaxLength(255);
             entity.Property(e => e.avatarPublicId).HasMaxLength(200);
+            entity.Property(e => e.IsVerified).HasDefaultValue(false);
+            entity.Property(e => e.SecurityStamp).HasMaxLength(100).IsRequired();
 
             entity.HasOne(d => d.Role)
                 .WithMany(p => p.Users)
