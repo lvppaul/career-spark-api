@@ -750,7 +750,8 @@ namespace CareerSpark.BusinessLayer.Services
             var verificationToken = GenerateEmailVerificationToken(user.Id, user.SecurityStamp);
 
             var encodedToken = HttpUtility.UrlEncode(verificationToken);
-            var confirmUrl = $"{_configuration["FrontendUrl"]}/confirm-email?email={user.Email!}&token={encodedToken}";
+            var confirmUrl = $"{_configuration["Frontend:BaseUrl"]}/confirm-email?email={user.Email!}&token={encodedToken}";
+
 
             await _emailService.SendEmailAsync(new EmailRequest
             {
