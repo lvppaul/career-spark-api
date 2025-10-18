@@ -927,6 +927,16 @@ namespace CareerSpark.BusinessLayer.Services
                     };
                 }
 
+                //Validate old and new password
+                if (BCrypt.Net.BCrypt.Verify(request.NewPassword, user.Password))
+                {
+                    return new AuthenticationResponse
+                    {
+                        Success = false,
+                        Message = "New Password and old password cannot be the same"
+                    };
+                }
+
                 await _unitOfWork.BeginTransactionAsync();
 
                 // Cập nhật mật khẩu mới đã được mã hóa
