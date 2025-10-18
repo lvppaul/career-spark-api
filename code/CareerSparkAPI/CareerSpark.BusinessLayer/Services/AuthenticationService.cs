@@ -852,7 +852,7 @@ namespace CareerSpark.BusinessLayer.Services
             var resetToken = GeneratePasswordResetToken(user.Id, user.SecurityStamp);
 
             var encodedToken = HttpUtility.UrlEncode(resetToken);
-            var resetUrl = $"{_configuration["FrontendUrl"]}/reset-password?email={HttpUtility.UrlEncode(user.Email!)}&token={encodedToken}";
+            var resetUrl = $"{_configuration["Frontend:BaseUrl"]}/reset-password?email={HttpUtility.UrlEncode(user.Email!)}&token={encodedToken}";
 
             await _emailService.SendEmailAsync(new EmailRequest
             {
