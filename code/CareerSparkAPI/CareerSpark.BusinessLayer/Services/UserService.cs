@@ -8,6 +8,7 @@ using CareerSpark.DataAccessLayer.Enums;
 using CareerSpark.DataAccessLayer.Helper;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 
 namespace CareerSpark.BusinessLayer.Services
@@ -16,10 +17,12 @@ namespace CareerSpark.BusinessLayer.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICloudinaryService _cloudinaryService;
-        public UserService(IUnitOfWork unitOfWork, ICloudinaryService cloudinaryService)
+        private readonly ILogger<UserService> _logger;
+        public UserService(IUnitOfWork unitOfWork, ICloudinaryService cloudinaryService, ILogger<UserService> logger)
         {
             _unitOfWork = unitOfWork;
             _cloudinaryService = cloudinaryService;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<UserResponse>> GetAllAsync()
@@ -309,6 +312,62 @@ namespace CareerSpark.BusinessLayer.Services
             return role != null;
         }
 
+        private (bool isValid, List<string> errors) IsValidPassword(string password)
+        {
+            bool isValid = true;
+            var errors = new List<string>();
+
+            if (string.IsNullOrEmpty(password))
+            {
+                errors.Add("Password must not be null or empty.");
+                isValid = false;
+            }
+
+            if (password.Length < 8)
+            {
+                errors.Add("Password must be at least 8 characters long.");
+                isValid = false;
+            }
+
+            if (!password.Any(char.IsUpper))
+            {
+                errors.Add("Password must contain at least one uppercase letter.");
+                isValid = false;
+            }
+
+            if (!password.Any(char.IsLower))
+            {
+                errors.Add("Password must contain at least one lowercase letter.");
+                isValid = false;
+            }
+
+            if (!password.Any(char.IsDigit))
+            {
+                errors.Add("Password must contain at least one digit.");
+                isValid = false;
+            }
+
+            if (!password.Any(c => !char.IsLetterOrDigit(c)))
+            {
+                errors.Add("Password must contain at least one special character.");
+                isValid = false;
+            }
+
+            return (isValid, errors);
+        }
+
+        private async Task<bool> IsCurrentUserPassword(int id, string password)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+            if (user == null)
+            {
+                return false;
+            }
+
+            return await _unitOfWork.UserRepository.VerifyPasswordAsync(user, password);
+
+        }
+
         private async Task ValidateUserUpdate(int id, UserUpdate userUpdate, User existingUser)
         {
             // Kiểm tra email uniqueness nếu email bị thay đổi
@@ -415,6 +474,62 @@ namespace CareerSpark.BusinessLayer.Services
             {
                 await _unitOfWork.RollbackTransactionAsync();
                 throw;
+            }
+        }
+
+        public async Task<bool> UpdatePasswordAsync(int userId, PasswordUpdate passwordUpdate)
+        {
+            if (passwordUpdate == null)
+                throw new ArgumentNullException(nameof(passwordUpdate), "Password update data cannot be null");
+
+            if (userId <= 0)
+                throw new ArgumentException("Invalid user ID", nameof(userId));
+
+            if (!string.IsNullOrWhiteSpace(passwordUpdate.CurrentPassword) && !await IsCurrentUserPassword(userId, passwordUpdate.CurrentPassword))
+            {
+                throw new ArgumentException("Current password is incorrect");
+            }
+
+            var (isValid, errors) = IsValidPassword(passwordUpdate.NewPassword);
+            if (!isValid)
+                throw new ArgumentException(string.Join("; ", errors));
+
+            if (passwordUpdate.CurrentPassword == passwordUpdate.NewPassword)
+            {
+                throw new ArgumentException("New password must be different from current password");
+            }
+
+            if (passwordUpdate.NewPassword != passwordUpdate.ConfirmNewPassword)
+            {
+                throw new ArgumentException("Password and confirmed password do not match");
+            }
+
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+                var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+                if (user == null)
+                    throw new InvalidOperationException("User not found");
+
+                user.Password = BCrypt.Net.BCrypt.HashPassword(passwordUpdate.NewPassword);
+
+                user.InvalidateAllTokens(); // Cập nhật SecurityStamp khi thay đổi mật khẩu
+
+                var updateResult = await _unitOfWork.UserRepository.UpdateAsync(user);
+                if (updateResult == 0)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw new InvalidOperationException("Failed to update user password - no changes were saved");
+                }
+                await _unitOfWork.CommitTransactionAsync();
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                _logger?.LogError(ex, "Error updating password for user {UserId}", userId);
+                return false;
             }
         }
     }

@@ -5,6 +5,7 @@ using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CareerSpark.API.Controllers
 {
@@ -381,5 +382,61 @@ namespace CareerSpark.API.Controllers
             }
 
         }
+
+        [Authorize]
+        [HttpPut]
+        [Route("update-my-password")]
+        public async Task<IActionResult> UpdateMyPassword([FromBody] PasswordUpdate passUpdate)
+        {
+            try
+            {
+                // Check ModelState for data annotations
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Invalid input data",
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized(new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "User ID claim not found or invalid",
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+                var isSuccess = await _userService.UpdatePasswordAsync(userId, passUpdate);
+                if (!isSuccess)
+                {
+                    return StatusCode(500, new ApiResponse<object>
+                    {
+                        Success = false,
+                        Message = "Failed to update user password",
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+                return Ok(new ApiResponse<object>
+                {
+                    Success = true,
+                    Message = "User password updated successfully",
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = $"Something wrong happends when updating user password: + {ex.Message}",
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
     }
 }

@@ -18,5 +18,6 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<UserResponse> UpdateAsync(int id, UserUpdate user);
 
         Task<bool> UpdateAvatar(int userId, IFormFile avatarImage);
+        Task<bool> UpdatePasswordAsync(int userId, PasswordUpdate passwordUpdate);
     }
 }
