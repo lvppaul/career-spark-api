@@ -1,9 +1,9 @@
 -- ========================================
 -- DROP & CREATE DATABASE (chạy riêng nếu cần)
 -- ========================================
--- DROP DATABASE IF EXISTS "CareerSparkDB";
--- CREATE DATABASE "CareerSparkDB";
--- \c CareerSparkDB
+ --DROP DATABASE IF EXISTS "CareerSparkDB";
+ --CREATE DATABASE "CareerSparkDB";
+ --\c CareerSparkDB
 
 -- ========================================
 -- CREATE TABLES
@@ -25,8 +25,11 @@ CREATE TABLE "User" (
     "Password" VARCHAR(255),
     "RefreshToken" VARCHAR(500),
     "ExpiredRefreshTokenAt" TIMESTAMPTZ,
-    "AvatarURL" VARCHAR(255),
+    "avatarURL" VARCHAR(255),
+	"avatarPublicId" VARCHAR(200),
     "IsActive" BOOLEAN NOT NULL DEFAULT TRUE,
+	"IsVerified" BOOLEAN NOT NULL DEFAULT FALSE,
+	"SecurityStamp" VARCHAR(100) NOT NULL,
     "CreatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "RoleId" INT NOT NULL REFERENCES "Role"("Id") ON DELETE CASCADE
 );
@@ -129,6 +132,7 @@ CREATE TABLE "SubscriptionPlan" (
     "Price" DECIMAL(18,2) NOT NULL,
     "DurationDays" INT NOT NULL,
     "Description" TEXT,
+	"Benefits" TEXT,
     "Level" INT NOT NULL,
     "IsActive" BOOLEAN NOT NULL DEFAULT TRUE
 );
@@ -164,3 +168,60 @@ CREATE TABLE "Orders" (
     "PaidAt" TIMESTAMPTZ,
     "ExpiredAt" TIMESTAMPTZ
 );
+
+--News
+CREATE TABLE "News" (
+    "Id" SERIAL PRIMARY KEY,
+    "Title" VARCHAR(255) NOT NULL,
+    "Content" TEXT NOT NULL,
+    "CreatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "IsActive" BOOLEAN NOT NULL DEFAULT TRUE,
+    "ImageUrl" VARCHAR(255),
+    "avatarPublicId" VARCHAR(200)
+);
+
+--CareerVectors: Langflow AI (chỉ chạy lệnh dưới khi dùng bên supabase)
+-- Bật extension vector nếu chưa có
+-- create extension if not exists vector;
+
+-- -- Tạo bảng lưu embeddings
+-- create table if not exists "CareerVectors" (
+--    id UUID PRIMARY KEY,
+--   content text,               -- nội dung gốc (ví dụ đoạn văn, file .txt)
+--   metadata jsonb,             -- thông tin phụ (tên file, query name, v.v.)
+--   embedding vector(1536)      -- vector embedding (độ dài 1536 cho model text-embedding-3-large)
+-- );
+-- -- Index
+-- CREATE INDEX IF NOT EXISTS careervectors_embedding_idx 
+-- ON "CareerVectors" 
+-- USING ivfflat (embedding vector_cosine_ops)
+-- WITH (lists = 100);
+--   -- Xóa hàm cũ trước (với đúng kiểu tham số)
+-- DROP FUNCTION IF EXISTS match_documents(vector, double precision, integer);
+-- -- Sau đó tạo lại hàm đúng
+-- CREATE OR REPLACE FUNCTION match_documents(
+--   query_embedding VECTOR(1536),
+--   match_threshold FLOAT DEFAULT 0.7,
+--   match_count INT DEFAULT 4
+-- )
+-- RETURNS TABLE (
+--   id UUID,
+--   content TEXT,
+--   metadata JSONB,
+--   similarity FLOAT
+-- )
+-- LANGUAGE plpgsql
+-- AS $$
+-- BEGIN
+--   RETURN QUERY
+--   SELECT
+--     "CareerVectors".id,
+--     "CareerVectors".content,
+--     "CareerVectors".metadata,
+--     1 - ("CareerVectors".embedding <=> query_embedding) AS similarity
+--   FROM "CareerVectors"
+--   WHERE 1 - ("CareerVectors".embedding <=> query_embedding) > match_threshold
+--   ORDER BY "CareerVectors".embedding <=> query_embedding
+--   LIMIT match_count;
+-- END;
+-- $$;

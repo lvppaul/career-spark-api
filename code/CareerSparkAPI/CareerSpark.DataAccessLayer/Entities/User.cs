@@ -21,6 +21,8 @@ public partial class User
     public DateTime? ExpiredRefreshTokenAt { get; set; }
 
     public bool IsActive { get; set; }
+    public bool IsVerified { get; set; }
+    public string SecurityStamp { get; set; } = Guid.NewGuid().ToString();
 
     public DateTime CreatedAt { get; set; }
 

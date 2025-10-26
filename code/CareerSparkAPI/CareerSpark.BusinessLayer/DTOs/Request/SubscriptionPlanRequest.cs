@@ -23,6 +23,9 @@ namespace CareerSpark.BusinessLayer.DTOs.Request
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string? Description { get; set; }
 
+        [StringLength(1000, ErrorMessage = "Benefits cannot exceed 1000 characters")]
+        public string? Benefits { get; set; }
+
 
     }
 

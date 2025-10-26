@@ -4,16 +4,16 @@
 
 -- Roles
 INSERT INTO "Role" ("RoleName") VALUES 
-('Admin'), ('User'), ('Moderator');
+('Admin'), ('Moderator'), ('User');
 
-INSERT INTO "public"."User" ("Id", "Name", "Phone", "Email", "Password", "avatarURL", "RefreshToken", "ExpiredRefreshTokenAt", "IsActive", "CreatedAt", "RoleId")
-VALUES ('1', 'Phát Lê Vĩnh', null, 'levinhphat790@gmail.com', null, null, null, null, 'true', '2025-10-06 17:39:57.748498', '2');
+INSERT INTO "public"."User" ("Id", "Name", "Phone", "Email", "Password", "avatarURL","avatarPublicId", "RefreshToken", "ExpiredRefreshTokenAt", "IsActive", "IsVerified","SecurityStamp", "CreatedAt", "RoleId")
+VALUES ('1', 'Phát Lê Vĩnh', null, 'levinhphat790@gmail.com', null, null, null, null, null, 'true', 'false', '1478b4c6-b518-42d4-a14e-054db39b36r6', '2025-10-06 17:39:57.748498', '2');
 
 -- Subscription Plans
-INSERT INTO "SubscriptionPlan" ("Name", "Price", "DurationDays", "Description", "Level", "IsActive") VALUES
-('Free Plan', 0, 30, 'Gói miễn phí cơ bản', 1, TRUE),
-('Standard Plan', 99.99, 90, 'Gói tiêu chuẩn 3 tháng', 2, TRUE),
-('Premium Plan', 299.99, 365, 'Gói cao cấp 1 năm', 3, TRUE);
+INSERT INTO "SubscriptionPlan" ("Name", "Price", "DurationDays", "Description", "Benefits", "Level", "IsActive") VALUES
+('Monthly Plan', 30000, 30, 'Gói đăng ký theo tháng – linh hoạt, tiết kiệm cho người dùng ngắn hạn', 'Hỗ trợ qua email, Không quảng cáo, Truy cập nội dung tiêu chuẩn' , 1, TRUE),
+('Quarterly Plan', 99000, 90, 'Gói đăng ký 3 tháng – tối ưu cho người dùng thường xuyên, nhiều tiện ích hơn', 'Hỗ trợ qua email và chat trực tiếp, Không quảng cáo, ChatAI(giới hạn lượt chat)', 2, TRUE),
+('Yearly Plan', 299000, 365, 'Gói đăng ký 1 năm – đầy đủ quyền lợi cao cấp và trải nghiệm tối đa', 'Hỗ trợ 24/7 qua email, chat và điện thoại, Không quảng cáo, chatAI, Ưu tiên trải nghiệm tính năng beta, Xem nội dung 4K Ultra HD', 3, TRUE);
 
 -- Career Fields
 INSERT INTO "CareerField" ("Name", "Description") VALUES

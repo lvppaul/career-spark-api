@@ -11,12 +11,22 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
         }
 
+        public override async Task<List<UserSubscription>> GetAllAsync()
+        {
+            return await _context.UserSubscriptions.Include(u => u.Plan).ToListAsync();
+        }
+
+        public override async Task<UserSubscription> GetByIdAsync(int id)
+        {
+            return await _context.UserSubscriptions.Include(u => u.Plan).FirstOrDefaultAsync(u => u.Id == id);
+        }
+
         public async Task<UserSubscription?> GetActiveSubscriptionByUserIdAsync(int userId)
         {
             return await _context.UserSubscriptions
                 .Include(us => us.Plan)
-                .FirstOrDefaultAsync(us => us.UserId == userId 
-                    && us.IsActive == true 
+                .FirstOrDefaultAsync(us => us.UserId == userId
+                    && us.IsActive == true
                     && us.EndDate >= DateOnly.FromDateTime(DateTime.UtcNow));
         }
 
@@ -50,8 +60,8 @@ namespace CareerSpark.DataAccessLayer.Repositories
         public async Task<bool> IsUserSubscriptionActiveAsync(int userId)
         {
             return await _context.UserSubscriptions
-                .AnyAsync(us => us.UserId == userId 
-                    && us.IsActive == true 
+                .AnyAsync(us => us.UserId == userId
+                    && us.IsActive == true
                     && us.EndDate >= DateOnly.FromDateTime(DateTime.UtcNow));
         }
     }

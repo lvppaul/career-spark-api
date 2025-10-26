@@ -1,4 +1,5 @@
-﻿using CareerSpark.BusinessLayer.DTOs.Request;
+﻿using CareerSpark.API.Responses;
+using CareerSpark.BusinessLayer.DTOs.Request;
 using CareerSpark.BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,8 +37,19 @@ namespace CareerSpark.API.Controllers
             {
                 return BadRequest(result);
             }
+            var verifyRequest = new ResendVerifyRequest() { Email = request.Email };
 
-            return Ok(result);
+            var emailSent = await _authenticationService.VerifyEmailAsync(verifyRequest, CancellationToken.None);
+            if (!emailSent)
+            {
+                return StatusCode(500, new { message = "Failed to send verification email" });
+            }
+
+            return CreatedAtAction(
+                        nameof(Register),   // Action name
+                        new { email = request.Email },  // route values
+                        result  // response body
+                );
         }
 
         [HttpPost("login")]
@@ -124,5 +136,133 @@ namespace CareerSpark.API.Controllers
             }
             return Ok(result);
         }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> Verify(ResendVerifyRequest request, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _authenticationService.VerifyEmailAsync(request, cancellationToken);
+
+            if (result == null)
+            {
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+
+            if (!result)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Failed to send verification email",
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Please check your mailbox to verify",
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(ConfirmEmailRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _authenticationService.ConfirmEmailAsync(request);
+            if (result == null)
+            {
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _authenticationService.ForgotPasswordAsync(request, cancellationToken);
+            if (!result)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Email not found or not verified. Please verify your email first.",
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Please check your mailbox to reset password",
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _authenticationService.ResetPasswordAsync(request);
+            if (result == null)
+            {
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        //[HttpPost("resend-verification")]
+        //public async Task<IActionResult> ResendVerification(ResendVerifyRequest request, CancellationToken cancellationToken)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+
+        //    var result = await _authenticationService.ResendVerifyAsync(request, cancellationToken);
+        //    if (result == null)
+        //    {
+        //        return StatusCode(500, new { message = "Internal server error" });
+        //    }
+        //    if (!result)
+        //    {
+        //        return BadRequest(new ApiResponse<object>
+        //        {
+        //            Success = false,
+        //            Message = "Failed to resend verify",
+        //            Timestamp = DateTime.UtcNow
+        //        });
+        //    }
+        //    return Ok(new ApiResponse<object>
+        //    {
+        //        Success = true,
+        //        Message = "Please check your mailbox to resend",
+        //        Timestamp = DateTime.UtcNow
+        //    });
+        //}
     }
 }

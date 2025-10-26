@@ -92,5 +92,13 @@ namespace CareerSpark.DataAccessLayer.Repositories
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Phone == phone);
         }
+
+        public async Task<bool> IsEmailVerifiedAsync(int userId)
+        {
+            var result = await _context.Users
+                .AnyAsync(u => u.Id == userId && u.IsVerified);
+
+            return result;
+        }
     }
 }

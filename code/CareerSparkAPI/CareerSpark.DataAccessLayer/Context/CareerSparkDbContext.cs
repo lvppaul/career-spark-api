@@ -45,6 +45,8 @@ public partial class CareerSparkDbContext : DbContext
 
     public virtual DbSet<UserSubscription> UserSubscriptions { get; set; }
 
+    public virtual DbSet<News> News { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -70,6 +72,20 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_CareerField");
             entity.ToTable("CareerField");
             entity.Property(e => e.Name).HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<News>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_News");
+            entity.ToTable("News");
+            entity.Property(e => e.Title).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.Content).IsRequired();
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp with time zone")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.ImageUrl).HasMaxLength(255);
+            entity.Property(e => e.avatarPublicId).HasMaxLength(200);
         });
 
         modelBuilder.Entity<CareerMapping>(entity =>
@@ -202,6 +218,7 @@ public partial class CareerSparkDbContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
             entity.Property(e => e.Level).IsRequired();
+            entity.Property(e => e.Benefits).HasColumnType("text");
         });
 
         modelBuilder.Entity<TestAnswer>(entity =>
@@ -275,6 +292,8 @@ public partial class CareerSparkDbContext : DbContext
             entity.Property(e => e.RefreshToken).HasMaxLength(500);
             entity.Property(e => e.avatarURL).HasMaxLength(255);
             entity.Property(e => e.avatarPublicId).HasMaxLength(200);
+            entity.Property(e => e.IsVerified).HasDefaultValue(false);
+            entity.Property(e => e.SecurityStamp).HasMaxLength(100).IsRequired();
 
             entity.HasOne(d => d.Role)
                 .WithMany(p => p.Users)

@@ -5,7 +5,7 @@ namespace CareerSpark.BusinessLayer.DTOs.Response
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public decimal Price { get; set; }
-
+        public string Benefits { get; set; } = string.Empty;
         public int Level { get; set; }
         public int DurationDays { get; set; }
         public string? Description { get; set; }
@@ -15,11 +15,12 @@ namespace CareerSpark.BusinessLayer.DTOs.Response
     {
         public int Id { get; set; }
         public int UserId { get; set; }
-        public string UserName { get; set; } = string.Empty;
         public int PlanId { get; set; }
         public string PlanName { get; set; } = string.Empty;
         public decimal PlanPrice { get; set; }
         public int PlanDurationDays { get; set; }
+        public int Level { get; set; }
+        public string Benefits { get; set; } = string.Empty;
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public bool? IsActive { get; set; }

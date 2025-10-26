@@ -11,7 +11,14 @@ namespace CareerSpark.DataAccessLayer.Repositories
         public OrderRepository(CareerSparkDbContext context) : base(context)
         {
         }
-
+        public override async Task<List<Order>> GetAllAsync()
+        {
+            return await _context.Orders.Include(o => o.User).Include(o => o.SubscriptionPlan).ToListAsync();
+        }
+        public override async Task<Order> GetByIdAsync(int id)
+        {
+            return await _context.Orders.Include(o => o.User).Include(o => o.SubscriptionPlan).FirstOrDefaultAsync(o => o.Id == id);
+        }
         public async Task<Order?> GetOrderByIdWithDetailsAsync(int orderId)
         {
             return await _context.Orders
@@ -24,6 +31,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
             return await _context.Orders
                 .Include(o => o.SubscriptionPlan)
+                .Include(o => o.User)
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
@@ -33,6 +41,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
             return await _context.Orders
                 .Include(o => o.SubscriptionPlan)
+                .Include(o => o.User)
                 .FirstOrDefaultAsync(o => o.UserId == userId
                     && o.SubscriptionPlanId == subscriptionPlanId
                     && o.Status == OrderStatus.Pending);

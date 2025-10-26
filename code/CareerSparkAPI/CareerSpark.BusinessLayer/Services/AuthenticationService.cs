@@ -1,6 +1,8 @@
 ﻿using CareerSpark.BusinessLayer.DTOs.Request;
 using CareerSpark.BusinessLayer.DTOs.Response;
+using CareerSpark.BusinessLayer.Extensions;
 using CareerSpark.BusinessLayer.Interfaces;
+using CareerSpark.BusinessLayer.Libraries;
 using CareerSpark.BusinessLayer.Mappings;
 using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Enums;
@@ -14,6 +16,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 
 namespace CareerSpark.BusinessLayer.Services
 {
@@ -26,9 +29,16 @@ namespace CareerSpark.BusinessLayer.Services
         private readonly IConfiguration _configuration;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IEmailService _emailService;
+        private readonly IUserSubscriptionService _userSubscriptionService;
 
 
-        public AuthenticationService(IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork, IConfiguration configuration)
+        public AuthenticationService(
+            IHttpClientFactory httpClientFactory,
+            IUnitOfWork unitOfWork,
+            IConfiguration configuration,
+            IEmailService emailService,
+            IUserSubscriptionService userSubscriptionService)
         {
             _unitOfWork = unitOfWork;
             _configuration = configuration;
@@ -37,16 +47,17 @@ namespace CareerSpark.BusinessLayer.Services
             _issuer = configuration["JwtSettings:Issuer"] ?? throw new ArgumentNullException("JWT Issuer not configured");
             _audience = configuration["JwtSettings:Audience"] ?? throw new ArgumentNullException("JWT Audience not configured");
             _expiryMinutes = int.Parse(configuration["JwtSettings:ExpiryMinutes"] ?? "30");
+            _emailService = emailService;
+            _userSubscriptionService = userSubscriptionService;
         }
 
 
         //GenerateAccessToken
-        public string GenerateAccessToken(User user, string roleName)
+        public string GenerateAccessToken(User user, string roleName, string activeLevelPlan)
         {
             var secretKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_secretKey));
             var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
             var email = user.Email;
-
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
@@ -55,7 +66,11 @@ namespace CareerSpark.BusinessLayer.Services
                     new Claim(JwtRegisteredClaimNames.Name, user.Name),
                     new Claim(JwtRegisteredClaimNames.Email, email),
                     new Claim("Role", roleName),
-                    new Claim ("avatarURL", user.avatarURL ?? string.Empty)
+                    new Claim ("avatarURL", user.avatarURL ?? string.Empty),
+                    new Claim("SubscriptionLevel", activeLevelPlan),
+                    // SecurityStamp trong AccessToken để validate mỗi request
+                    new Claim("SecurityStamp", user.SecurityStamp)
+
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(_expiryMinutes),
                 Issuer = _issuer,
@@ -104,6 +119,19 @@ namespace CareerSpark.BusinessLayer.Services
                 //ClaimsIdentity: chứa các thông tin về người dùng được mã hóa trong token
                 if (result.IsValid && result.ClaimsIdentity != null)
                 {
+                    // Kiểm tra SecurityStamp mỗi request
+                    var userIdClaim = result.ClaimsIdentity.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+                    var tokenSecurityStamp = result.ClaimsIdentity.FindFirst("SecurityStamp")?.Value;
+                    if (int.TryParse(userIdClaim, out int userId) && !string.IsNullOrEmpty(tokenSecurityStamp))
+                    {
+                        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+                        if (user != null && !user.IsSecurityStampValid(tokenSecurityStamp))
+                        {
+                            // SecurityStamp không khớp -> Token đã bị invalidate
+                            return null;
+                        }
+                    }
+
                     return new ClaimsPrincipal(result.ClaimsIdentity);
                 }
 
@@ -138,6 +166,16 @@ namespace CareerSpark.BusinessLayer.Services
                 };
             }
 
+            var isVerified = await _unitOfWork.UserRepository.IsEmailVerifiedAsync(user.Id);
+            if (!isVerified)
+            {
+                return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = "Email not verified. Please verify your email to login."
+                };
+            }
+
             var isValidPassword = await _unitOfWork.UserRepository.VerifyPasswordAsync(user, request.Password);
             if (!isValidPassword)
             {
@@ -166,7 +204,10 @@ namespace CareerSpark.BusinessLayer.Services
                 };
             }
 
-            var accessToken = GenerateAccessToken(user, roleName);
+            // Lấy thông tin gói đăng ký hiện tại của user
+            var activeSubscription = await _userSubscriptionService.GetActiveSubscriptionByUserIdAsync(user.Id);
+            var activeLevelPlan = activeSubscription?.Level ?? 0;
+            var accessToken = GenerateAccessToken(user, roleName, activeLevelPlan.ToString());
             var refreshToken = GenerateRefreshToken();
             var expiresAt = DateTime.UtcNow.AddMinutes(30);
             var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
@@ -259,8 +300,12 @@ namespace CareerSpark.BusinessLayer.Services
                 };
             }
 
+            // Lấy thông tin gói đăng ký hiện tại của user
+            var activeSubscription = await _userSubscriptionService.GetActiveSubscriptionByUserIdAsync(user.Id);
+            var activeLevelPlan = activeSubscription?.Level ?? 0;
+
             // nếu chưa hết hạn thì tạo access token mới
-            var newAccessToken = GenerateAccessToken(user, roleName);
+            var newAccessToken = GenerateAccessToken(user, roleName, activeLevelPlan.ToString());
             var newRefreshToken = GenerateRefreshToken();
             //var accessTokenExpiry = DateTime.UtcNow.AddMinutes(30);
             var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
@@ -386,6 +431,9 @@ namespace CareerSpark.BusinessLayer.Services
                 var newUser = UserMapper.ToEntity(request);
                 newUser.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
+                // Tạo SecurityStamp mới cho user
+                newUser.UpdateSecurityStamp();
+
                 // PrepareCreate để tránh gọi SaveChanges nhiều lần
                 // PrepareCreate chỉ thêm entity vào context chứ không lưu vào db ngay lập tức như CreateAsync
                 _unitOfWork.UserRepository.PrepareCreate(newUser);
@@ -401,29 +449,29 @@ namespace CareerSpark.BusinessLayer.Services
                 }
 
                 // Generate tokens
-                var accessToken = GenerateAccessToken(createdUser, role.RoleName);
-                var refreshToken = GenerateRefreshToken();
-                var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+                /*   var accessToken = GenerateAccessToken(createdUser, role.RoleName);
+                   var refreshToken = GenerateRefreshToken();
+                   var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
-                // Update user with refresh token
-                createdUser.RefreshToken = refreshToken;
-                createdUser.ExpiredRefreshTokenAt = refreshTokenExpiry;
-                // tương tự PrepareCreate
-                _unitOfWork.UserRepository.PrepareUpdate(createdUser);
-                await _unitOfWork.SaveAsync();
+                   // Update user with refresh token
+                   createdUser.RefreshToken = refreshToken;
+                   createdUser.ExpiredRefreshTokenAt = refreshTokenExpiry
+                   // tương tự PrepareCreate
+                   _unitOfWork.UserRepository.PrepareUpdate(createdUser);
+                   await _unitOfWork.SaveAsync();*/
 
                 await _unitOfWork.CommitTransactionAsync();
 
                 return new AuthenticationResponse
                 {
                     Success = true,
-                    Message = "User registered successfully",
+                    Message = "User registered successfully. Please Verify to enjoy all our services",
                     Data = new AuthenticationData
                     {
-                        AccessToken = accessToken,
-                        RefreshToken = refreshToken
+                        User = UserMapper.ToResponse(createdUser)
                     }
                 };
+
             }
             catch (Exception ex)
             {
@@ -624,9 +672,10 @@ namespace CareerSpark.BusinessLayer.Services
                         Name = userInfo.Name,
                         Email = userInfo.Email,
                         IsActive = true,
-                        RoleId = 2,
+                        RoleId = (int)UserRole.User,
                         CreatedAt = DateTime.UtcNow,
-                        avatarURL = userInfo.Picture
+                        avatarURL = userInfo.Picture,
+                        IsVerified = true
                     };
 
                     _unitOfWork.UserRepository.PrepareCreate(user);
@@ -652,10 +701,13 @@ namespace CareerSpark.BusinessLayer.Services
                     }
                 }
 
+                // Lấy thông tin gói đăng ký hiện tại của user
+                var activeSubscription = await _userSubscriptionService.GetActiveSubscriptionByUserIdAsync(user.Id);
+                var activeLevelPlan = activeSubscription?.Level ?? 0;
                 string roleName = user.Role?.RoleName ?? "User";
 
                 // Generate tokens
-                var accessToken = GenerateAccessToken(user, roleName);
+                var accessToken = GenerateAccessToken(user, roleName, activeLevelPlan.ToString());
                 var refreshToken = GenerateRefreshToken();
                 var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
@@ -686,5 +738,361 @@ namespace CareerSpark.BusinessLayer.Services
             }
         }
 
+        public async Task<bool> VerifyEmailAsync(ResendVerifyRequest request, CancellationToken cancellationToken)
+        {
+            var user = await _unitOfWork.UserRepository.GetByEmailAsync(request.Email);
+            if (user == null || user.IsVerified == true)
+            {
+                return false;
+            }
+
+            // Tạo JWT token thay vì DataProtection
+            var verificationToken = GenerateEmailVerificationToken(user.Id, user.SecurityStamp);
+
+            var encodedToken = HttpUtility.UrlEncode(verificationToken);
+            var confirmUrl = $"{_configuration["FrontendUrl"]}/confirm-email?email={user.Email!}&token={encodedToken}";
+
+            await _emailService.SendEmailAsync(new EmailRequest
+            {
+                To = user.Email!,
+                Subject = "Confirm your email for register",
+                Body = EmailTemplateReader.ConfirmationTemplate(user.Name!, confirmUrl)
+            }, cancellationToken);
+
+            return true;
+        }
+
+        public async Task<AuthenticationResponse> ConfirmEmailAsync(ConfirmEmailRequest request)
+        {
+            var user = await _unitOfWork.UserRepository.GetByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = "User not found"
+                };
+            }
+
+            if (user.IsVerified == true)
+            {
+                return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = "Email is already verified"
+                };
+            }
+
+
+            try
+            {
+                var decodedToken = HttpUtility.UrlDecode(request.Token);
+                var (userId, securityStamp) = await ValidateEmailVerificationToken(decodedToken);
+
+                if (userId != user.Id)
+                {
+                    return new AuthenticationResponse
+                    {
+                        Success = false,
+                        Message = "Invalid token"
+                    };
+                }
+
+                // Kiểm tra SecurityStamp
+                if (!user.IsSecurityStampValid(securityStamp))
+                {
+                    return new AuthenticationResponse
+                    {
+                        Success = false,
+                        Message = "Token has been invalidated. Please request a new verification email."
+                    };
+                }
+
+                await _unitOfWork.BeginTransactionAsync();
+                // Xác thực email thành công
+                user.IsVerified = true;
+                user.InvalidateAllTokens();
+                _unitOfWork.UserRepository.PrepareUpdate(user);
+                await _unitOfWork.SaveAsync();
+                await _unitOfWork.CommitTransactionAsync();
+
+                return new AuthenticationResponse
+                {
+                    Success = true,
+                    Message = "Email verified successfully"
+                };
+            }
+            catch
+            {
+                return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = "Invalid or expired token"
+                };
+            }
+        }
+
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken)
+        {
+            var user = await _unitOfWork.UserRepository.GetByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return false;
+            }
+
+            // BUSINESS RULE: Chỉ cho phép reset password khi đã verified
+            if (user.IsVerified != true)
+            {
+                return false; // Không gửi email nếu chưa verify
+            }
+
+
+            // Tạo JWT token cho reset password
+            var resetToken = GeneratePasswordResetToken(user.Id, user.SecurityStamp);
+
+            var encodedToken = HttpUtility.UrlEncode(resetToken);
+            var resetUrl = $"{_configuration["FrontendUrl"]}/reset-password?email={HttpUtility.UrlEncode(user.Email!)}&token={encodedToken}";
+
+            await _emailService.SendEmailAsync(new EmailRequest
+            {
+                To = user.Email!,
+                Subject = "Reset Password",
+                Body = EmailResetPasswordTemplate.ResetConfirmationTemplate(user.Name!, resetUrl)
+            }, cancellationToken);
+
+            return true;
+        }
+
+        public async Task<AuthenticationResponse> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            var user = await _unitOfWork.UserRepository.GetByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = "User not found"
+                };
+            }
+
+            // Business Rule: Chỉ cho phép reset khi đã verified
+            if (user.IsVerified != true)
+            {
+                return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = "Please verify your email first before resetting password"
+                };
+            }
+
+
+            try
+            {
+                var decodedToken = HttpUtility.UrlDecode(request.Token);
+                var (userId, securityStamp) = await ValidatePasswordResetToken(decodedToken);
+
+                if (userId != user.Id)
+                {
+                    return new AuthenticationResponse
+                    {
+                        Success = false,
+                        Message = "Invalid token"
+                    };
+                }
+
+                // Kiểm tra SecurityStamp
+                if (!user.IsSecurityStampValid(securityStamp))
+                {
+                    return new AuthenticationResponse
+                    {
+                        Success = false,
+                        Message = "Token has been invalidated. Please request a new reset password email."
+                    };
+                }
+
+                // Validate password complexity
+                var AuthPasswordErrors = ValidatePassword(request.NewPassword);
+                if (AuthPasswordErrors.Errors?.Any() == true)
+                {
+                    return AuthPasswordErrors;
+                }
+
+                // Validate password confirmation
+                if (request.NewPassword != request.ConfirmNewPassword)
+                {
+                    return new AuthenticationResponse
+                    {
+                        Success = false,
+                        Message = "Password and confirmed password do not match"
+                    };
+                }
+
+                //Validate old and new password
+                if (BCrypt.Net.BCrypt.Verify(request.NewPassword, user.Password))
+                {
+                    return new AuthenticationResponse
+                    {
+                        Success = false,
+                        Message = "New Password and old password cannot be the same"
+                    };
+                }
+
+                await _unitOfWork.BeginTransactionAsync();
+
+                // Cập nhật mật khẩu mới đã được mã hóa
+                user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+                // Xóa refresh token cũ để buộc đăng nhập lại
+                user.InvalidateAllTokens();
+
+                _unitOfWork.UserRepository.PrepareUpdate(user);
+                await _unitOfWork.SaveAsync();
+                await _unitOfWork.CommitTransactionAsync();
+
+                return new AuthenticationResponse
+                {
+                    Success = true,
+                    Message = "Password reset successfully"
+                };
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return new AuthenticationResponse
+                {
+                    Success = false,
+                    Message = "Invalid or expired token"
+                };
+            }
+        }
+
+        // Thêm các helper methods
+        private string GenerateEmailVerificationToken(int userId, string securityStamp)
+        {
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+            var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("sub", userId.ToString()),
+                    new Claim("type", "email_verification"),
+                    new Claim("SecurityStamp", securityStamp),
+                    new Claim("iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
+                }),
+                Expires = DateTime.UtcNow.AddHours(24), // 24 giờ hết hạn
+                Issuer = _issuer,
+                Audience = _audience,
+                SigningCredentials = signingCredentials
+            };
+
+            var handler = new JsonWebTokenHandler();
+            return handler.CreateToken(tokenDescriptor);
+        }
+
+        private string GeneratePasswordResetToken(int userId, string securityStamp)
+        {
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+            var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("sub", userId.ToString()),
+                    new Claim("type", "password_reset"),
+                    new Claim("SecurityStamp", securityStamp),
+                    new Claim("iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(30), // 30 phút hết hạn
+                Issuer = _issuer,
+                Audience = _audience,
+                SigningCredentials = signingCredentials
+            };
+
+            var handler = new JsonWebTokenHandler();
+            return handler.CreateToken(tokenDescriptor);
+        }
+
+        private async Task<(int userId, string securityStamp)> ValidateEmailVerificationToken(string token)
+        {
+            var tokenHandler = new JsonWebTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _issuer,
+                ValidAudience = _audience,
+                IssuerSigningKey = key,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            var result = await tokenHandler.ValidateTokenAsync(token, validationParameters);
+
+            if (!result.IsValid || result.ClaimsIdentity == null)
+            {
+                throw new SecurityTokenValidationException("Invalid token");
+            }
+
+            var typeClaim = result.ClaimsIdentity.FindFirst("type")?.Value;
+            if (typeClaim != "email_verification")
+            {
+                throw new SecurityTokenValidationException("Invalid token type");
+            }
+
+            var userIdClaim = result.ClaimsIdentity.FindFirst("sub")?.Value;
+            var securityStampClaim = result.ClaimsIdentity.FindFirst("SecurityStamp")?.Value;
+            if (!int.TryParse(userIdClaim, out int userId) || string.IsNullOrEmpty(securityStampClaim))
+            {
+                throw new SecurityTokenValidationException("Invalid token claims");
+            }
+
+
+            return (userId, securityStampClaim);
+        }
+
+        private async Task<(int userId, string securityStamp)> ValidatePasswordResetToken(string token)
+        {
+            var tokenHandler = new JsonWebTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _issuer,
+                ValidAudience = _audience,
+                IssuerSigningKey = key,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            var result = await tokenHandler.ValidateTokenAsync(token, validationParameters);
+
+            if (!result.IsValid || result.ClaimsIdentity == null)
+            {
+                throw new SecurityTokenValidationException("Invalid token");
+            }
+
+            var typeClaim = result.ClaimsIdentity.FindFirst("type")?.Value;
+            if (typeClaim != "password_reset")
+            {
+                throw new SecurityTokenValidationException("Invalid token type");
+            }
+
+            var userIdClaim = result.ClaimsIdentity.FindFirst("sub")?.Value;
+            var securityStampClaim = result.ClaimsIdentity.FindFirst("SecurityStamp")?.Value;
+            if (!int.TryParse(userIdClaim, out int userId) || string.IsNullOrEmpty(securityStampClaim))
+            {
+                throw new SecurityTokenValidationException("Invalid token claims");
+            }
+
+            return (userId, securityStampClaim);
+        }
     }
 }
