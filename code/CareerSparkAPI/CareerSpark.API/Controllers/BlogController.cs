@@ -552,5 +552,45 @@ namespace CareerSpark.API.Controllers
                 });
             }
         }
+
+        // New: get my blogs (user id from claims)
+        [Authorize(Roles = "User")]
+        [HttpGet("my-blogs")]
+        public async Task<IActionResult> GetMyBlogs()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized(new
+                    {
+                        success = false,
+                        message = "Invalid user token",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var blogs = await _blogService.GetMyBlogsAsync(userId);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Successfully retrieved your blogs",
+                    data = blogs,
+                    count = blogs.Count(),
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving your blogs",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
     }
 }

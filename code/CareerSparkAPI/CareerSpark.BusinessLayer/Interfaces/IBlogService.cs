@@ -22,5 +22,7 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<bool> UpdateBlogPublishedAsync(int id);
         Task<bool> UpdateBlogUnpublishedAsync(int id);
         Task<bool> UpdateBlogDeletedAsync(int id);
+        // New: get blogs by current user
+        Task<IEnumerable<BlogResponse>> GetMyBlogsAsync(int userId);
     }
 }
