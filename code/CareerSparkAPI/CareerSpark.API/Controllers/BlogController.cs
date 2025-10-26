@@ -18,7 +18,7 @@ namespace CareerSpark.API.Controllers
             _blogService = blogService;
         }
 
-        [Authorize(Roles = "Admin,User")]
+        [Authorize]
         [HttpGet("PublishedPagination")]
         public async Task<IActionResult> GetAllBlogsWithPagination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -73,7 +73,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateBlog([FromBody] BlogRequest blogRequest)
         {
@@ -128,7 +128,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBlog(int id, [FromBody] BlogUpdate blogUpdate)
         {
@@ -201,7 +201,7 @@ namespace CareerSpark.API.Controllers
                 });
             }
         }
-
+        [Authorize]
         [HttpGet("GetAllBlogs")]
         public async Task<IActionResult> GetAllBlogs()
         {
@@ -227,7 +227,7 @@ namespace CareerSpark.API.Controllers
                 });
             }
         }
-
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBlogById(int id)
         {
@@ -274,7 +274,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,User")]
+        [Authorize]
         [HttpGet("BlogPublished")]
         public async Task<IActionResult> GetAllPublishedBlogs()
         {
@@ -383,7 +383,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBlog(int id)
         {

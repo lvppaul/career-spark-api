@@ -16,6 +16,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
             return _context.Blogs
                 .Include(b => b.Comments)
+                .Include(b => b.Author)
                 .Where(b => !b.IsDeleted && b.IsPublished);
         }
 
@@ -23,6 +24,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
             return await _context.Blogs
                 .Include(b => b.Comments) // Include Comments
+                .Include(b => b.Author)
                 .FirstOrDefaultAsync(b => b.Id == id) ?? new Blog();
         }
 
@@ -30,6 +32,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
             return await _context.Blogs
                 .Include(b => b.Comments)
+                .Include(b => b.Author)
                 .Where(b => !b.IsDeleted)
                 .OrderByDescending(b => b.CreateAt) // Order by newest first
                 .ToListAsync();
@@ -90,6 +93,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
             return _context.Blogs
                 .Include(b => b.Comments)
+                .Include(b => b.Author)
                 .Where(b => !b.IsDeleted && !b.IsPublished)
                 .OrderByDescending(b => b.CreateAt)
                 .ToListAsync();
@@ -99,6 +103,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
         {
             var query = _context.Blogs
                 .Include(b => b.Comments)
+                .Include(b => b.Author)
                 .Where(b => !b.IsDeleted && !b.IsPublished);
 
             var totalCount = await query.CountAsync();
