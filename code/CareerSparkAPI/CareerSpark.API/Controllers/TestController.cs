@@ -48,14 +48,7 @@ namespace CareerSpark.API.Controllers
             return Ok(latest);
         }
 
-        // lấy ra test session gần nhất của user (route có userId - legacy)
-        [HttpGet("sessions/{userId}/latest")]
-        public async Task<IActionResult> GetLatestUserSession(int userId)
-        {
-            var latest = await _service.GetLatestUserTestSessionAsync(userId);
-            if (latest == null) return NotFound();
-            return Ok(latest);
-        }
+       
 
         // lấy ra result theo test session id
         [HttpGet("result/{sessionId}")]
