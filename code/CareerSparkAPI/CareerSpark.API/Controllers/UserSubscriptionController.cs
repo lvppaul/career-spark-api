@@ -16,7 +16,7 @@ namespace CareerSpark.API.Controllers
             _userSubscriptionService = userSubscriptionService;
         }
 
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllUserSubscriptions()
         {
@@ -45,7 +45,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserSubscriptionById(int id)
         {
@@ -93,7 +93,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize]
         [HttpGet("user/{userId}/active")]
         public async Task<IActionResult> GetActiveSubscriptionByUserId(int userId)
         {
@@ -142,7 +142,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize]
         [HttpGet("user/{userId}/history")]
         public async Task<IActionResult> GetSubscriptionHistoryByUserId(int userId)
         {
@@ -272,7 +272,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize]
         [HttpGet("user/{userId}/status")]
         public async Task<IActionResult> CheckUserSubscriptionStatus(int userId)
         {

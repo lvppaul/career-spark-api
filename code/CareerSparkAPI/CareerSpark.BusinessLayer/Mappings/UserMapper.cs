@@ -20,6 +20,7 @@ namespace CareerSpark.BusinessLayer.Mappings
                 Phone = user.Phone,
                 CreatedAt = user.CreatedAt,
                 IsActive = user.IsActive,
+                IsVerified = user.IsVerified,
                 Role = (UserRole)user.RoleId,
                 avatarURL = user.avatarURL
             };
