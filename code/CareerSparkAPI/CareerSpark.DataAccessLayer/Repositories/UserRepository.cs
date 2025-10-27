@@ -41,13 +41,15 @@ namespace CareerSpark.DataAccessLayer.Repositories
 
         public override async Task<PaginatedResult<User>> GetAllAsyncWithPagination(Pagination pagination)
         {
-            // Get total count
-            var totalCount = await _context.Users.CountAsync();
-
-            // Get paginated items with Role included
-            var items = await _context.Users
+            // Exclude Admin users in both count and items
+            var query = _context.Users
                 .Include(u => u.Role)
-                .OrderBy(u => u.Id) // Thêm ordering để đảm bảo consistent pagination
+                .Where(u => u.Role.RoleName != "Admin");
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(u => u.Id)
                 .Skip(pagination.Skip)
                 .Take(pagination.Take)
                 .ToListAsync();

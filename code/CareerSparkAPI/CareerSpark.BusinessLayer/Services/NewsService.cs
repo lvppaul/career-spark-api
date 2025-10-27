@@ -109,6 +109,7 @@ namespace CareerSpark.BusinessLayer.Services
                 }
 
                 existingNews.Title = updatedNews.Title?.Trim() ?? existingNews.Title;
+                existingNews.Tag = updatedNews.Tag?.Trim() ?? existingNews.Tag;
                 existingNews.Content = updatedNews.Content?.Trim() ?? existingNews.Content;
 
                 if (updatedNews.ImageFile != null && updatedNews.ImageFile.Length > 0)

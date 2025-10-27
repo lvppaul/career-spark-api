@@ -30,6 +30,8 @@ namespace CareerSpark.BusinessLayer.Services
             var users = await _unitOfWork.UserRepository.GetAllAsync();
             if (users == null || !users.Any())
                 return Enumerable.Empty<UserResponse>();
+            // Exclude Admin users
+            users = users.Where(u => u.Role?.RoleName != "Admin").ToList();
             return users.Select(UserMapper.ToResponse).ToList();
         }
 
