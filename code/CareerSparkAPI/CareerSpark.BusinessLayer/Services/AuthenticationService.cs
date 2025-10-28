@@ -151,7 +151,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Email and password are required"
+                    Message = "Yêu cầu nhập email và mật khẩu"
                 };
             }
 
@@ -162,7 +162,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "User does not exist! Please check your email and try later."
+                    Message = "Người dùng không tồn tại! Vui lòng kiểm tra email và thử lại."
                 };
             }
 
@@ -172,7 +172,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Email not verified. Please verify your email to login."
+                    Message = "Email chưa được xác thực. Vui lòng xác thực email để đăng nhập."
                 };
             }
 
@@ -182,7 +182,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Invalid password! Please check your password and try later."
+                    Message = "Mật khẩu không đúng! Vui lòng kiểm tra và thử lại."
                 };
             }
             if (user.IsActive != true)
@@ -190,7 +190,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Account is inactive"
+                    Message = "Tài khoản đang bị vô hiệu hóa"
                 };
             }
 
@@ -200,7 +200,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "User role not found"
+                    Message = "Không tìm thấy vai trò của người dùng"
                 };
             }
 
@@ -220,14 +220,14 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Failed to update user refresh token"
+                    Message = "Cập nhật refresh token thất bại"
                 };
             }
 
             return new AuthenticationResponse
             {
                 Success = true,
-                Message = "Login successful",
+                Message = "Đăng nhập thành công",
                 Data = new AuthenticationData
                 {
                     AccessToken = accessToken,
@@ -245,7 +245,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Refresh token is required"
+                    Message = "Yêu cầu cung cấp refresh token"
                 };
             }
 
@@ -257,7 +257,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Invalid refresh token"
+                    Message = "Refresh token không hợp lệ"
                 };
             }
 
@@ -275,7 +275,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Refresh token has expired"
+                    Message = "Refresh token đã hết hạn"
                 };
             }
 
@@ -285,7 +285,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Account is inactive"
+                    Message = "Tài khoản đang bị vô hiệu hóa"
                 };
             }
 
@@ -296,7 +296,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "User role not found"
+                    Message = "Không tìm thấy vai trò của người dùng"
                 };
             }
 
@@ -317,7 +317,7 @@ namespace CareerSpark.BusinessLayer.Services
             return new AuthenticationResponse
             {
                 Success = true,
-                Message = "Token refreshed successfully",
+                Message = "Làm mới token thành công",
                 Data = new AuthenticationData
                 {
                     AccessToken = newAccessToken,
@@ -338,7 +338,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Email, password and name are required"
+                    Message = "Yêu cầu nhập email, mật khẩu và họ tên"
                 };
             }
 
@@ -348,7 +348,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Invalid email format"
+                    Message = "Định dạng email không hợp lệ"
                 };
             }
 
@@ -359,7 +359,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Invalid phone number format"
+                    Message = "Định dạng số điện thoại không hợp lệ"
                 };
             }
             var phoneExists = await _unitOfWork.UserRepository.GetByPhoneAsync(request.Phone);
@@ -368,7 +368,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Phone number already in use"
+                    Message = "Số điện thoại đã được sử dụng"
                 };
             }
 
@@ -386,7 +386,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Password and confirmed password do not match"
+                    Message = "Mật khẩu và xác nhận mật khẩu không khớp"
                 };
             }
 
@@ -397,7 +397,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "User with this email already exists"
+                    Message = "Email này đã được đăng ký"
                 };
             }
 
@@ -407,7 +407,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = $"Invalid role: {request.RoleId}"
+                    Message = $"Vai trò không hợp lệ: {request.RoleId}"
                 };
             }
 
@@ -417,7 +417,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Invalid role specified"
+                    Message = "Vai trò không hợp lệ"
                 };
             }
 
@@ -465,7 +465,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = true,
-                    Message = "User registered successfully. Please Verify to enjoy all our services",
+                    Message = "Đăng ký thành công. Vui lòng xác thực email để sử dụng đầy đủ dịch vụ",
                     Data = new AuthenticationData
                     {
                         User = UserMapper.ToResponse(createdUser)
@@ -479,7 +479,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = $"Registration failed: {ex.Message}"
+                    Message = $"Đăng ký thất bại: {ex.Message}"
                 };
             }
         }
@@ -493,7 +493,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Either access token or refresh token is required"
+                    Message = "Cần cung cấp access token hoặc refresh token"
                 };
             }
 
@@ -529,7 +529,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Invalid token or user not found"
+                        Message = "Token không hợp lệ hoặc không tìm thấy người dùng"
                     };
                 }
 
@@ -539,7 +539,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Account is inactive"
+                        Message = "Tài khoản đang bị vô hiệu hóa"
                     };
                 }
 
@@ -554,14 +554,14 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Failed to logout user"
+                        Message = "Đăng xuất thất bại"
                     };
                 }
 
                 return new AuthenticationResponse
                 {
                     Success = true,
-                    Message = "Logout successful"
+                    Message = "Đăng xuất thành công"
                 };
             }
             catch (Exception ex)
@@ -569,7 +569,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = $"Logout failed: {ex.Message}"
+                    Message = $"Đăng xuất thất bại: {ex.Message}"
                 };
             }
         }
@@ -600,27 +600,27 @@ namespace CareerSpark.BusinessLayer.Services
 
             if (password.Length < 8)
             {
-                errors.Add("Password must be at least 8 characters long.");
+                errors.Add("Mật khẩu phải có ít nhất 8 ký tự.");
             }
 
             if (!password.Any(char.IsUpper))
             {
-                errors.Add("Password must contain at least one uppercase letter.");
+                errors.Add("Mật khẩu phải chứa ít nhất một ký tự hoa.");
             }
 
             if (!password.Any(char.IsLower))
             {
-                errors.Add("Password must contain at least one lowercase letter.");
+                errors.Add("Mật khẩu phải chứa ít nhất một ký tự thường.");
             }
 
             if (!password.Any(char.IsDigit))
             {
-                errors.Add("Password must contain at least one digit.");
+                errors.Add("Mật khẩu phải chứa ít nhất một chữ số.");
             }
 
             if (!password.Any(c => !char.IsLetterOrDigit(c)))
             {
-                errors.Add("Password must contain at least one special character.");
+                errors.Add("Mật khẩu phải chứa ít nhất một ký tự đặc biệt.");
             }
 
             return new AuthenticationResponse
@@ -630,7 +630,7 @@ namespace CareerSpark.BusinessLayer.Services
                 // nếu có lỗi thì trả về danh sách lỗi, không thì trả về null
                 Errors = errors.Count > 0 ? errors : null,
                 // nếu có lỗi thì trả về thông báo lỗi chung, không thì trả về null
-                Message = errors.Count > 0 ? "Password validation failed" : null
+                Message = errors.Count > 0 ? "Xác thực mật khẩu không thành công" : null
             };
         }
 
@@ -647,7 +647,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Invalid Google access token"
+                        Message = "Google access token không hợp lệ"
                     };
                 }
 
@@ -659,7 +659,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Failed to retrieve user info from Google"
+                        Message = "Không thể lấy thông tin người dùng từ Google"
                     };
                 }
 
@@ -696,7 +696,7 @@ namespace CareerSpark.BusinessLayer.Services
                         return new AuthenticationResponse
                         {
                             Success = false,
-                            Message = "Account is inactive"
+                            Message = "Tài khoản đang bị vô hiệu hóa"
                         };
                     }
                 }
@@ -720,7 +720,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = true,
-                    Message = "Google login successful",
+                    Message = "Đăng nhập Google thành công",
                     Data = new AuthenticationData
                     {
                         AccessToken = accessToken,
@@ -733,7 +733,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = $"Google login failed: {ex.Message}"
+                    Message = $"Đăng nhập Google thất bại: {ex.Message}"
                 };
             }
         }
@@ -771,7 +771,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "User not found"
+                    Message = "Không tìm thấy người dùng"
                 };
             }
 
@@ -780,7 +780,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Email is already verified"
+                    Message = "Email đã được xác thực"
                 };
             }
 
@@ -795,7 +795,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Invalid token"
+                        Message = "Token không hợp lệ"
                     };
                 }
 
@@ -805,7 +805,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Token has been invalidated. Please request a new verification email."
+                        Message = "Token đã bị vô hiệu hóa. Vui lòng yêu cầu email xác thực mới."
                     };
                 }
 
@@ -820,7 +820,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = true,
-                    Message = "Email verified successfully"
+                    Message = "Xác thực email thành công"
                 };
             }
             catch
@@ -828,7 +828,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Invalid or expired token"
+                    Message = "Token không hợp lệ hoặc đã hết hạn"
                 };
             }
         }
@@ -872,7 +872,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "User not found"
+                    Message = "Không tìm thấy người dùng"
                 };
             }
 
@@ -882,7 +882,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Please verify your email first before resetting password"
+                    Message = "Vui lòng xác thực email trước khi đặt lại mật khẩu"
                 };
             }
 
@@ -897,7 +897,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Invalid token"
+                        Message = "Token không hợp lệ"
                     };
                 }
 
@@ -907,7 +907,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Token has been invalidated. Please request a new reset password email."
+                        Message = "Token đã bị vô hiệu hóa. Vui lòng yêu cầu email đặt lại mật khẩu mới."
                     };
                 }
 
@@ -924,7 +924,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "Password and confirmed password do not match"
+                        Message = "Mật khẩu và xác nhận mật khẩu không khớp"
                     };
                 }
 
@@ -934,7 +934,7 @@ namespace CareerSpark.BusinessLayer.Services
                     return new AuthenticationResponse
                     {
                         Success = false,
-                        Message = "New Password and old password cannot be the same"
+                        Message = "Mật khẩu mới không được trùng với mật khẩu cũ"
                     };
                 }
 
@@ -952,7 +952,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = true,
-                    Message = "Password reset successfully"
+                    Message = "Đặt lại mật khẩu thành công"
                 };
             }
             catch
@@ -961,7 +961,7 @@ namespace CareerSpark.BusinessLayer.Services
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Invalid or expired token"
+                    Message = "Token không hợp lệ hoặc đã hết hạn"
                 };
             }
         }
