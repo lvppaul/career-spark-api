@@ -79,6 +79,7 @@ public partial class CareerSparkDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_News");
             entity.ToTable("News");
             entity.Property(e => e.Title).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.Tag).HasMaxLength(100);
             entity.Property(e => e.Content).IsRequired();
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp with time zone")

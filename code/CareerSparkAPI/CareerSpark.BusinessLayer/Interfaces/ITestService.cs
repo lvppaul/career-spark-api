@@ -17,5 +17,6 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<List<QuestionTestResponse>> GetQuestionsAsync();
         Task<List<TestSessionDto>> GetUserTestSessionsAsync(int userId);
         Task<TestResultResponse> GetResultBySessionAsync(int sessionId);
+        Task<TestSessionDto?> GetLatestUserTestSessionAsync(int userId);
     }
 }

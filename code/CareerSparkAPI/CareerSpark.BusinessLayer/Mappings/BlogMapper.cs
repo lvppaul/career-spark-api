@@ -18,6 +18,8 @@ namespace CareerSpark.BusinessLayer.Mappings
                 Tag = blog.Tag ?? string.Empty,
                 Content = blog.Content ?? string.Empty,
                 AuthorId = blog.AuthorId,
+                AuthorName = blog.Author?.Name ?? string.Empty,
+                AuthorAvatarUrl = blog.Author?.avatarURL,
                 CreateAt = blog.CreateAt,
                 UpdatedAt = blog.UpdatedAt
             };

@@ -268,5 +268,16 @@ namespace CareerSpark.BusinessLayer.Services
             await _unitOfWork.SaveAsync();
             return true;
         }
+
+        // New: Get blogs by current user
+        public async Task<IEnumerable<BlogResponse>> GetMyBlogsAsync(int userId)
+        {
+            var blogs = await _unitOfWork.BlogRepository.GetAllAsync();
+            var myBlogs = blogs.Where(b => b.AuthorId == userId && !b.IsDeleted)
+                               .OrderByDescending(b => b.CreateAt)
+                               .Select(BlogMapper.ToResponse)
+                               .ToList();
+            return myBlogs;
+        }
     }
 }

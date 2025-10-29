@@ -359,5 +359,28 @@ namespace CareerSpark.BusinessLayer.Services
             _logger.LogInformation("GetQuestionsAsync returning {Count} items", result.Count);
             return result;
         }
+
+        // New: get the latest session of a user
+        public async Task<TestSessionDto?> GetLatestUserTestSessionAsync(int userId)
+        {
+            _logger.LogInformation("GetLatestUserTestSessionAsync called for UserId={UserId}", userId);
+            var sessions = await _uow.TestSessionRepository.GetAllAsync();
+            var latest = sessions
+                .Where(s => s.UserId == userId)
+                .OrderByDescending(s => s.StartAt)
+                .FirstOrDefault();
+
+            if (latest == null)
+            {
+                _logger.LogInformation("No sessions found for UserId={UserId}", userId);
+                return null;
+            }
+
+            return new TestSessionDto
+            {
+                SessionId = latest.Id,
+                StartAt = latest.StartAt ?? DateTime.MinValue
+            };
+        }
     }
 }

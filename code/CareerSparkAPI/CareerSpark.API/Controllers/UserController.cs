@@ -432,7 +432,7 @@ namespace CareerSpark.API.Controllers
                 return StatusCode(500, new ApiResponse<object>
                 {
                     Success = false,
-                    Message = $"Something wrong happends when updating user password: + {ex.Message}",
+                    Message = $" {ex.Message}",
                     Timestamp = DateTime.UtcNow
                 });
             }
