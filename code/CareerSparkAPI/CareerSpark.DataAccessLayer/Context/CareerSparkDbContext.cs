@@ -162,9 +162,9 @@ public partial class CareerSparkDbContext : DbContext
                     v => (OrderStatus)System.Enum.Parse(typeof(OrderStatus), v, true))
                 .HasDefaultValue(OrderStatus.Pending);
 
-            entity.Property(e => e.VnPayTransactionId).HasMaxLength(255);
-            entity.Property(e => e.VnPayOrderInfo).HasMaxLength(500);
-            entity.Property(e => e.VnPayResponseCode).HasMaxLength(10);
+            entity.Property(e => e.PayOSTransactionId).HasMaxLength(255);
+            entity.Property(e => e.PayOSOrderInfo).HasMaxLength(500);
+            entity.Property(e => e.PayOSResponseCode).HasMaxLength(10);
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp with time zone")
