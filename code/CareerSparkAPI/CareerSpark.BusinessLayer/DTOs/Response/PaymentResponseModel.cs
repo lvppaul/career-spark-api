@@ -8,7 +8,7 @@
         public string PaymentId { get; set; }
         public bool Success { get; set; }
         public string Token { get; set; }
-        public string VnPayResponseCode { get; set; }
+        public string PayOSResponseCode { get; set; }
         public double TransactionOrderIdReference { get; set; }
 
     }

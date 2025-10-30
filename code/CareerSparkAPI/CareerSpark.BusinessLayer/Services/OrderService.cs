@@ -13,13 +13,13 @@ namespace CareerSpark.BusinessLayer.Services
     public class OrderService : IOrderService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IVnPayService _vnPayService;
+        private readonly IPayOSService _payOSService;
         private readonly ILogger<OrderService> _logger;
 
-        public OrderService(IUnitOfWork unitOfWork, IVnPayService vnPayService, ILogger<OrderService> logger)
+        public OrderService(IUnitOfWork unitOfWork, IPayOSService payOSService, ILogger<OrderService> logger)
         {
             _unitOfWork = unitOfWork;
-            _vnPayService = vnPayService;
+            _payOSService = payOSService;
             _logger = logger;
         }
 
@@ -88,7 +88,7 @@ namespace CareerSpark.BusinessLayer.Services
                         Name = user.Name
                     };
 
-                    var existingPaymentUrl = await _vnPayService.CreatePaymentUrl(existingPaymentInfo, httpContext);
+                    var existingPaymentUrl = await _payOSService.CreatePaymentUrl(existingPaymentInfo, httpContext);
 
                     await _unitOfWork.RollbackTransactionAsync();
                     return new CreateOrderResponse
@@ -107,7 +107,7 @@ namespace CareerSpark.BusinessLayer.Services
                     SubscriptionPlanId = request.SubscriptionPlanId,
                     Amount = subscriptionPlanRequest.Price,
                     Status = OrderStatus.Pending,
-                    VnPayOrderInfo = $"Thanh toan goi {subscriptionPlanRequest.Name}",
+                    PayOSOrderInfo = $"Thanh toan goi {subscriptionPlanRequest.Name}",
                     CreatedAt = DateTime.UtcNow,
                     ExpiredAt = DateTime.UtcNow.AddMinutes(15) // Order expires in 15 minutes
                 };
@@ -119,12 +119,12 @@ namespace CareerSpark.BusinessLayer.Services
                 var paymentInfo = new PaymentInformationModel
                 {
                     Amount = (double)order.Amount,
-                    OrderDescription = order.VnPayOrderInfo,
+                    OrderDescription = order.PayOSOrderInfo,
                     OrderId = order.Id,
                     Name = user.Name
                 };
 
-                var paymentUrl = await _vnPayService.CreatePaymentUrl(paymentInfo, httpContext);
+                var paymentUrl = await _payOSService.CreatePaymentUrl(paymentInfo, httpContext);
 
                 await _unitOfWork.CommitTransactionAsync();
 
@@ -213,14 +213,14 @@ namespace CareerSpark.BusinessLayer.Services
                     return false;
                 }
 
-                // Update order status based on VNPay response
-                var newStatus = paymentResponse.VnPayResponseCode == "00" ? "Paid" : "Failed";
+                // Update order status based on PayOS response
+                var newStatus = paymentResponse.PayOSResponseCode == "00" ? "Paid" : "Failed";
 
                 await _unitOfWork.OrderRepository.UpdateOrderStatusAsync(
                     orderId,
                     newStatus,
                     paymentResponse.TransactionId,
-                    paymentResponse.VnPayResponseCode
+                    paymentResponse.PayOSResponseCode
                 );
 
                 // If payment successful, handle user subscription
@@ -287,9 +287,7 @@ namespace CareerSpark.BusinessLayer.Services
                         _unitOfWork.UserSubscriptionRepository.PrepareCreate(userSubscription);
                     }
 
-
                     _logger.LogInformation("New subscription created for user {UserId} with plan {PlanId}", order.UserId, order.SubscriptionPlanId);
-
                 }
 
                 await _unitOfWork.SaveAsync();

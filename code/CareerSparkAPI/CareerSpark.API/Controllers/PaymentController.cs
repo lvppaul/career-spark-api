@@ -7,14 +7,14 @@ namespace CareerSpark.API.Controllers
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        private readonly IVnPayService _vnPayService;
+        private readonly IPayOSService _payOSService;
         private readonly IOrderService _orderService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IVnPayService vnPayService, IOrderService orderService, IConfiguration configuration, ILogger<PaymentController> logger)
+        public PaymentController(IPayOSService payOSService, IOrderService orderService, IConfiguration configuration, ILogger<PaymentController> logger)
         {
-            _vnPayService = vnPayService;
+            _payOSService = payOSService;
             _orderService = orderService;
             _configuration = configuration;
             _logger = logger;
@@ -57,34 +57,34 @@ namespace CareerSpark.API.Controllers
         //}
 
         // -------------------- Xử lý callback từ VNPay --------------------
-        [HttpGet("Checkout/PaymentCallbackVnpay")]
+        [HttpGet("Checkout/PaymentCallbackPayOS")]
         public async Task<IActionResult> PaymentCallbackVnpay()
         {
             try
             {
-                // 1. Lấy toàn bộ query mà VNPay gửi về
+                // 1. Lấy toàn bộ query mà PayOS gửi về
                 var query = HttpContext.Request.Query;
                 var rawUrl = $"{Request.Scheme}://{Request.Host}{Request.Path}?{Request.QueryString}";
 
-                // 2. Parse và xác minh chữ ký
-                var vnpayResponse = await _vnPayService.PaymentExecute(rawUrl);
-                if (vnpayResponse == null)
-                    return Redirect(BuildFrontendUrl("failed", "invalid_signature"));
+                // 2. Parse và xác minh thanh toán
+                var payOSResponse = await _payOSService.PaymentExecute(rawUrl);
+                if (payOSResponse == null)
+                    return Redirect(BuildFrontendUrl("failed", "invalid_response"));
 
                 // 3. Cập nhật Order trong DB
-                var callbackProcessed = await _orderService.ProcessPaymentCallbackAsync(vnpayResponse);
+                var callbackProcessed = await _orderService.ProcessPaymentCallbackAsync(payOSResponse);
                 if (!callbackProcessed)
-                    return Redirect(BuildFrontendUrl("failed", "process_failed", vnpayResponse.OrderId));
+                    return Redirect(BuildFrontendUrl("failed", "process_failed", payOSResponse.OrderId));
 
                 // 4. Redirect sang FE tuỳ kết quả
-                if (vnpayResponse.Success && vnpayResponse.VnPayResponseCode == "00")
+                if (payOSResponse.Success && payOSResponse.PayOSResponseCode == "00")
                 {
                     return Redirect(BuildFrontendUrl(
                         "success",
                         "payment_success",
-                        vnpayResponse.OrderId,
-                        vnpayResponse.TransactionOrderIdReference,
-                        vnpayResponse.VnPayResponseCode
+                        payOSResponse.OrderId,
+                        payOSResponse.TransactionOrderIdReference,
+                        payOSResponse.PayOSResponseCode
                     ));
                 }
                 else
@@ -92,9 +92,9 @@ namespace CareerSpark.API.Controllers
                     return Redirect(BuildFrontendUrl(
                         "failed",
                         "payment_failed",
-                        vnpayResponse.OrderId,
-                        vnpayResponse.TransactionOrderIdReference,
-                        vnpayResponse.VnPayResponseCode
+                        payOSResponse.OrderId,
+                        payOSResponse.TransactionOrderIdReference,
+                        payOSResponse.PayOSResponseCode
                     ));
                 }
             }
@@ -104,7 +104,6 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-
         private string BuildFrontendUrl(
           string status,
           string message,
@@ -113,7 +112,7 @@ namespace CareerSpark.API.Controllers
           string? code = null)
         {
             // FE base URL: chỉ cần domain (không bao gồm /payment/result)
-            var feBaseUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
+            var feBaseUrl = _configuration["Frontend:BaseUrl"] ?? "https://localhost:5173";
             var url = $"{feBaseUrl}/payment/result?status={status}&message={message}";
 
             if (!string.IsNullOrEmpty(orderId))
@@ -125,6 +124,5 @@ namespace CareerSpark.API.Controllers
 
             return url;
         }
-
     }
 }

@@ -7,7 +7,7 @@ namespace CareerSpark.DataAccessLayer.Interfaces
         Task<Order?> GetOrderByIdWithDetailsAsync(int orderId);
         Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId);
         Task<Order?> GetPendingOrderByUserAndPlanAsync(int userId, int subscriptionPlanId);
-        Task<bool> UpdateOrderStatusAsync(int orderId, string status, string? vnPayTransactionId = null, string? vnPayResponseCode = null);
-        Task<Order?> GetOrderByVnPayTransactionAsync(string vnPayTransactionId);
+        Task<bool> UpdateOrderStatusAsync(int orderId, string status, string? payOSTransactionId = null, string? payOSResponseCode = null);
+        Task<Order?> GetOrderByPayOSTransactionAsync(string payOSTransactionId);
     }
 }

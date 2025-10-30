@@ -94,7 +94,7 @@ namespace CareerSpark.API
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IBlogService, BlogService>();
-            builder.Services.AddScoped<IVnPayService, VnPayService>();
+            builder.Services.AddScoped<IPayOSService, PayOSService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
             builder.Services.AddScoped<IUserSubscriptionService, UserSubscriptionService>();
