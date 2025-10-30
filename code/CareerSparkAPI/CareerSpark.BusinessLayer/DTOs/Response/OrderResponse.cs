@@ -13,10 +13,10 @@ namespace CareerSpark.BusinessLayer.DTOs.Response
         public decimal Amount { get; set; }
         public OrderStatus Status { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? VnPayTransactionId { get; set; }
-        public string? VnPayOrderInfo { get; set; }
+        public string? PayOSTransactionId { get; set; }
+        public string? PayOSOrderInfo { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? VnPayResponseCode { get; set; }
+        public string? PayOSResponseCode { get; set; }
         public DateTime CreatedAt { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public DateTime? PaidAt { get; set; }

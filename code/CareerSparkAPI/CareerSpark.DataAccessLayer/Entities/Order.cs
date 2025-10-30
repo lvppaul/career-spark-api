@@ -14,11 +14,11 @@ public partial class Order
 
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
-    public string? VnPayTransactionId { get; set; }
+    public string? PayOSTransactionId { get; set; }
 
-    public string? VnPayOrderInfo { get; set; }
+    public string? PayOSOrderInfo { get; set; }
 
-    public string? VnPayResponseCode { get; set; }
+    public string? PayOSResponseCode { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

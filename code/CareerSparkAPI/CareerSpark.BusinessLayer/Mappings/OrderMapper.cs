@@ -16,9 +16,9 @@ namespace CareerSpark.BusinessLayer.Mappings
                 SubscriptionPlanName = order.SubscriptionPlan?.Name ?? string.Empty,
                 Amount = order.Amount,
                 Status = order.Status,
-                VnPayTransactionId = order.VnPayTransactionId,
-                VnPayOrderInfo = order.VnPayOrderInfo,
-                VnPayResponseCode = order.VnPayResponseCode,
+                PayOSTransactionId = order.PayOSTransactionId,
+                PayOSOrderInfo = order.PayOSOrderInfo,
+                PayOSResponseCode = order.PayOSResponseCode,
                 CreatedAt = order.CreatedAt,
                 PaidAt = order.PaidAt,
                 ExpiredAt = order.ExpiredAt

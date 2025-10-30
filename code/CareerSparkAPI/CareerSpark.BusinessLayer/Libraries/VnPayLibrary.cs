@@ -1,4 +1,4 @@
-﻿using CareerSpark.BusinessLayer.DTOs.Response;
+using CareerSpark.BusinessLayer.DTOs.Response;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
 using System.Net;
@@ -74,7 +74,7 @@ namespace CareerSpark.BusinessLayer.Libraries
                 PaymentId = vnPayTranId.ToString(),
                 TransactionId = vnPayTranId.ToString(),
                 Token = vnpSecureHash,
-                VnPayResponseCode = vnpResponseCode,
+                //VnPayResponseCode = vnpResponseCode,
                 TransactionOrderIdReference = transactionReference
             };
         }

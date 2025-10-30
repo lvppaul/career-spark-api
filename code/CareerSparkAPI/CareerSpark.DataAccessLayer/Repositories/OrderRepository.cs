@@ -47,7 +47,7 @@ namespace CareerSpark.DataAccessLayer.Repositories
                     && o.Status == OrderStatus.Pending);
         }
 
-        public async Task<bool> UpdateOrderStatusAsync(int orderId, string status, string? vnPayTransactionId = null, string? vnPayResponseCode = null)
+        public async Task<bool> UpdateOrderStatusAsync(int orderId, string status, string? payOSTransactionId = null, string? payOSResponseCode = null)
         {
             var order = await _context.Orders.FindAsync(orderId);
             if (order == null) return false;
@@ -62,10 +62,10 @@ namespace CareerSpark.DataAccessLayer.Repositories
                 return false; // Invalid status
             }
 
-            if (!string.IsNullOrEmpty(vnPayTransactionId))
-                order.VnPayTransactionId = vnPayTransactionId;
-            if (!string.IsNullOrEmpty(vnPayResponseCode))
-                order.VnPayResponseCode = vnPayResponseCode;
+            if (!string.IsNullOrEmpty(payOSTransactionId))
+                order.PayOSTransactionId = payOSTransactionId;
+            if (!string.IsNullOrEmpty(payOSResponseCode))
+                order.PayOSResponseCode = payOSResponseCode;
 
             if (order.Status == OrderStatus.Paid)
                 order.PaidAt = DateTime.UtcNow;
@@ -74,12 +74,12 @@ namespace CareerSpark.DataAccessLayer.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<Order?> GetOrderByVnPayTransactionAsync(string vnPayTransactionId)
+        public async Task<Order?> GetOrderByPayOSTransactionAsync(string payOSTransactionId)
         {
             return await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.SubscriptionPlan)
-                .FirstOrDefaultAsync(o => o.VnPayTransactionId == vnPayTransactionId);
+                .FirstOrDefaultAsync(o => o.PayOSTransactionId == payOSTransactionId);
         }
     }
 }
