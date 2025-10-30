@@ -62,26 +62,43 @@ namespace CareerSpark.API.Controllers
         {
             try
             {
+                // 1️ Lấy URL callback đầy đủ từ PayOS
                 var rawUrl = $"{Request.Scheme}://{Request.Host}{Request.Path}?{Request.QueryString}";
+
+                // 2️ Gọi PayOSService để xác minh thanh toán
                 var payOSResponse = await _payOSService.PaymentExecute(rawUrl);
-
                 if (payOSResponse == null)
-                    return RedirectPermanent(BuildFrontendUrl("failed", "invalid_response"));
+                    return Redirect(BuildFrontendUrl("failed", "invalid_response"));
 
+                // 3️ Cập nhật Order trong DB
                 var processed = await _orderService.ProcessPaymentCallbackAsync(payOSResponse);
                 if (!processed)
-                    return RedirectPermanent(BuildFrontendUrl("failed", "process_failed", payOSResponse.OrderId));
+                    return Redirect(BuildFrontendUrl("failed", "process_failed", payOSResponse.OrderId));
 
+                // 4️ Redirect sang FE theo kết quả thanh toán
                 if (payOSResponse.Success && payOSResponse.PayOSResponseCode == "00")
-                    return RedirectPermanent(BuildFrontendUrl("success", "payment_success", payOSResponse.OrderId));
+                {
+                    return Redirect(BuildFrontendUrl(
+                        "success",
+                        "payment_success",
+                        payOSResponse.OrderId
+                    ));
+                }
                 else
-                    return RedirectPermanent(BuildFrontendUrl("failed", "payment_failed", payOSResponse.OrderId));
+                {
+                    return Redirect(BuildFrontendUrl(
+                        "failed",
+                        "payment_failed",
+                        payOSResponse.OrderId
+                    ));
+                }
             }
             catch (Exception ex)
             {
-                return RedirectPermanent(BuildFrontendUrl("failed", Uri.EscapeDataString(ex.Message)));
+                return Redirect(BuildFrontendUrl("failed", Uri.EscapeDataString(ex.Message)));
             }
         }
+
 
 
         private string BuildFrontendUrl(
