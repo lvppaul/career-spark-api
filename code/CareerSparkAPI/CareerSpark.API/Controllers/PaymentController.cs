@@ -58,7 +58,7 @@ namespace CareerSpark.API.Controllers
 
         // -------------------- Xử lý callback từ VNPay --------------------
         [HttpGet("Checkout/PaymentCallbackPayOS")]
-        public async Task<IActionResult> PaymentCallbackVnpay()
+        public async Task<IActionResult> PaymentCallbackPayOS()
         {
             try
             {
