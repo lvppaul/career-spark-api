@@ -152,14 +152,14 @@ namespace CareerSpark.API.Controllers
                     return BadRequest(new { code = "01", message = "Invalid signature or data" });
                 }
 
-                //var orderIdString = data.orderCode.ToString().Substring(0, data.orderCode.ToString().Length - 10);
+                var orderIdString = data.orderCode.ToString().Substring(0, data.orderCode.ToString().Length - 10);
                 //  Chuyển dữ liệu webhook sang PaymentResponseModel
                 var paymentResponse = new PaymentResponseModel
                 {
                     Success = webhookBody.success && webhookBody.code == "00",
                     PaymentMethod = "PayOS",
-                    // OrderId = orderIdString,
-                    OrderId = data.orderCode.ToString(),
+                    OrderId = orderIdString,
+                    // OrderId = data.orderCode.ToString(),
                     PaymentId = data.paymentLinkId,
                     TransactionId = data.reference,
                     Token = data.paymentLinkId,
