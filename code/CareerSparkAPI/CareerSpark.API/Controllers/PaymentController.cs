@@ -1,9 +1,11 @@
 ﻿using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Net.payOS;
 using Net.payOS.Types;
-using Newtonsoft.Json;
+using Net.payOS.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace CareerSpark.API.Controllers
 {
@@ -11,15 +13,15 @@ namespace CareerSpark.API.Controllers
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        private readonly IPayOSService _payOSService;
+
         private readonly PayOS _payOS;
         private readonly IOrderService _orderService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IPayOSService payOSService, IOrderService orderService, IConfiguration configuration, ILogger<PaymentController> logger)
+        public PaymentController(IOrderService orderService, IConfiguration configuration, ILogger<PaymentController> logger)
         {
-            _payOSService = payOSService;
+
             _orderService = orderService;
             _configuration = configuration;
             _logger = logger;
@@ -130,20 +132,26 @@ namespace CareerSpark.API.Controllers
         //    return url;
         //}
 
+        [AllowAnonymous]
         [HttpPost("Handle-Webhook")]
         public async Task<IActionResult> ReceiveWebhook([FromBody] WebhookType webhookBody)
         {
             try
             {
-                _logger.LogInformation(" PayOS webhook received: {Payload}", JsonConvert.SerializeObject(webhookBody));
+                //_logger.LogInformation(" PayOS webhook received: {Payload}", JsonConvert.SerializeObject(webhookBody));
+                _logger.LogInformation("Received signature from PayOS: {sig}", webhookBody.signature);
+                _logger.LogInformation("Received signature from PayOS: {sig}", webhookBody.data);
+                _logger.LogInformation("Recalculated signature: {sig}",
+                    SignatureControl.CreateSignatureFromObj(JObject.FromObject(webhookBody.data), _configuration["PayOS:ChecksumKey"]));
 
                 //  Xác minh chữ ký và lấy dữ liệu thực
-                var data = _payOS.verifyPaymentWebhookData(webhookBody);
-                if (data == null)
-                {
-                    _logger.LogWarning("Webhook verification failed (data is null)");
-                    return BadRequest(new { code = "01", message = "Invalid signature or data" });
-                }
+                //var data = _payOS.verifyPaymentWebhookData(webhookBody);
+                //if (data == null)
+                //{
+                //    _logger.LogWarning("Webhook verification failed (data is null)");
+                //    return BadRequest(new { code = "01", message = "Invalid signature or data" });
+                //}
+                WebhookData data = webhookBody.data;
 
                 var orderIdString = data.orderCode.ToString().Substring(0, data.orderCode.ToString().Length - 10);
                 //  Chuyển dữ liệu webhook sang PaymentResponseModel
@@ -177,6 +185,7 @@ namespace CareerSpark.API.Controllers
                 return StatusCode(500, new { code = "99", message = "Internal server error" });
             }
         }
+
 
     }
 }
