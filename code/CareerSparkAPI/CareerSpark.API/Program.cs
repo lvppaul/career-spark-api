@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Resend;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -101,7 +102,8 @@ namespace CareerSpark.API
             builder.Services.AddScoped<ITestService, TestService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             builder.Services.AddScoped<INewsService, NewsService>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
+            //   builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IEmailService, ResendEmailService>();
 
             builder.Services.AddCors(options =>
             {
@@ -133,8 +135,14 @@ namespace CareerSpark.API
             //ReferenceHandler.IgnoreCycles bảo serializer bỏ qua vòng lặp, không bị crash nữa.
             //Nó sẽ bỏ qua property lặp lại, thay vì serialize vô hạn.
             builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
             builder.Services.AddHttpClient();
+            builder.Services.AddOptions();
+            builder.Services.AddHttpClient<ResendClient>();
+            builder.Services.Configure<ResendClientOptions>(o =>
+            {
+                o.ApiToken = builder.Configuration["Resend:ApiKey"]!;
+            });
+            builder.Services.AddTransient<IResend, ResendClient>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
