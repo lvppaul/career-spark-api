@@ -17,13 +17,16 @@ namespace CareerSpark.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IPayOSService payOSService, IOrderService orderService, IConfiguration configuration, ILogger<PaymentController> logger, PayOS payOS)
+        public PaymentController(IPayOSService payOSService, IOrderService orderService, IConfiguration configuration, ILogger<PaymentController> logger)
         {
             _payOSService = payOSService;
             _orderService = orderService;
             _configuration = configuration;
             _logger = logger;
-            _payOS = payOS;
+            var clientId = _configuration["PayOS:ClientId"] ?? "";
+            var apiKey = _configuration["PayOS:ApiKey"] ?? "";
+            var checksumKey = _configuration["PayOS:ChecksumKey"] ?? "";
+            _payOS = new PayOS(clientId, apiKey, checksumKey);
         }
 
         //[HttpPost("CreatePaymentUrlVnpay")]
