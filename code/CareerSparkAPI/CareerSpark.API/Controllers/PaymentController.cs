@@ -145,21 +145,21 @@ namespace CareerSpark.API.Controllers
                     SignatureControl.CreateSignatureFromObj(JObject.FromObject(webhookBody.data), _configuration["PayOS:ChecksumKey"]));
 
                 //  Xác minh chữ ký và lấy dữ liệu thực
-                //var data = _payOS.verifyPaymentWebhookData(webhookBody);
-                //if (data == null)
-                //{
-                //    _logger.LogWarning("Webhook verification failed (data is null)");
-                //    return BadRequest(new { code = "01", message = "Invalid signature or data" });
-                //}
-                WebhookData data = webhookBody.data;
+                var data = _payOS.verifyPaymentWebhookData(webhookBody);
+                if (data == null)
+                {
+                    _logger.LogWarning("Webhook verification failed (data is null)");
+                    return BadRequest(new { code = "01", message = "Invalid signature or data" });
+                }
 
-                var orderIdString = data.orderCode.ToString().Substring(0, data.orderCode.ToString().Length - 10);
+                //var orderIdString = data.orderCode.ToString().Substring(0, data.orderCode.ToString().Length - 10);
                 //  Chuyển dữ liệu webhook sang PaymentResponseModel
                 var paymentResponse = new PaymentResponseModel
                 {
                     Success = webhookBody.success && webhookBody.code == "00",
                     PaymentMethod = "PayOS",
-                    OrderId = orderIdString,
+                    // OrderId = orderIdString,
+                    OrderId = data.orderCode.ToString(),
                     PaymentId = data.paymentLinkId,
                     TransactionId = data.reference,
                     Token = data.paymentLinkId,
