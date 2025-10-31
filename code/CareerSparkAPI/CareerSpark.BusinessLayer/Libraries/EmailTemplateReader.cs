@@ -8,6 +8,7 @@
         <html>
         <body style='font-family: Arial;'>
             <h2>Xin chào {userName},</h2>
+            <img src='https://res.cloudinary.com/dliirxsmo/image/upload/v1761800009/logo_dacig0.jpg' alt='Logo' width='120'/>
             <p>Cảm ơn bạn đã đăng ký tài khoản tại <b>CareerSpark</b>.</p>
             <p>Vui lòng xác nhận email của bạn bằng cách nhấn nút bên dưới:</p>
             <p>
