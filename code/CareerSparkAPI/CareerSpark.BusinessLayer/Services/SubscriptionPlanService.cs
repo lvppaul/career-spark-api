@@ -113,12 +113,15 @@ namespace CareerSpark.BusinessLayer.Services
                         await _unitOfWork.RollbackTransactionAsync();
                         throw new InvalidOperationException($"Subscription plan with name '{request.Name}' already exists");
                     }
-                    existingPlan.Name = request.Name;
                 }
 
-                if (!string.IsNullOrWhiteSpace(request.Description))
-                    existingPlan.Description = request.Description;
-
+                // Update all fields from the update model
+                existingPlan.Name = request.Name;
+                existingPlan.Price = request.Price;
+                existingPlan.DurationDays = request.DurationDays;
+                existingPlan.Level = request.Level;
+                existingPlan.Description = request.Description; // allow null/empty to clear description
+                existingPlan.Benefits = request.Benefits;
                 _unitOfWork.SubscriptionPlanRepository.PrepareUpdate(existingPlan);
                 await _unitOfWork.SaveAsync();
                 await _unitOfWork.CommitTransactionAsync();
