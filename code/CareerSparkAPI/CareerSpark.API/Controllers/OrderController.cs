@@ -276,5 +276,172 @@ namespace CareerSpark.API.Controllers
                 });
             }
         }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpGet]
+        public async Task<IActionResult> GetOrdersPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? year = null, [FromQuery] int? month = null, [FromQuery] int? day = null)
+        {
+            try
+            {
+                if (pageNumber <= 0 || pageSize <= 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid pagination parameters",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var result = await _orderService.GetOrdersPagedAsync(pageNumber, pageSize, year, month, day);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Orders retrieved successfully",
+                    data = result.Items,
+                    pagination = new { result.TotalCount, result.PageNumber, result.PageSize, result.TotalPages, result.HasPrevious, result.HasNext },
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving orders",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpGet("revenue/total")]
+        public async Task<IActionResult> GetTotalRevenue([FromQuery] DateTime? start = null, [FromQuery] DateTime? end = null)
+        {
+            try
+            {
+                var total = await _orderService.GetTotalRevenueAsync(start, end);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Total revenue retrieved successfully",
+                    data = new { total },
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving total revenue",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpGet("revenue/years")]
+        public async Task<IActionResult> GetRevenueByYear()
+        {
+            try
+            {
+                var data = await _orderService.GetRevenueByYearAsync();
+                return Ok(new
+                {
+                    success = true,
+                    message = "Revenue by year retrieved successfully",
+                    data,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving revenue by year",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpGet("revenue/months")]
+        public async Task<IActionResult> GetRevenueByMonth([FromQuery] int year)
+        {
+            try
+            {
+                if (year <= 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid year",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var data = await _orderService.GetRevenueByMonthAsync(year);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Revenue by month retrieved successfully",
+                    data,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving revenue by month",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpGet("revenue/days")]
+        public async Task<IActionResult> GetRevenueByDay([FromQuery] int year, [FromQuery] int month)
+        {
+            try
+            {
+                if (year <= 0 || month <= 0 || month > 12)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid year or month",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var data = await _orderService.GetRevenueByDayAsync(year, month);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Revenue by day retrieved successfully",
+                    data,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving revenue by day",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
     }
 }
