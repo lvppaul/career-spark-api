@@ -4,6 +4,8 @@ using CareerSpark.DataAccessLayer.Enums;
 using CareerSpark.DataAccessLayer.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using SysEnum = System.Enum;
+using CareerSpark.DataAccessLayer.Helper;
+
 namespace CareerSpark.DataAccessLayer.Repositories
 {
     public class OrderRepository : GenericRepository<Order>, IOrderRepository
@@ -80,6 +82,97 @@ namespace CareerSpark.DataAccessLayer.Repositories
                 .Include(o => o.User)
                 .Include(o => o.SubscriptionPlan)
                 .FirstOrDefaultAsync(o => o.PayOSTransactionId == payOSTransactionId);
+        }
+
+        public async Task<PaginatedResult<Order>> GetOrdersPagedAsync(Pagination pagination, int? year, int? month, int? day)
+        {
+            var query = _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.SubscriptionPlan)
+                .AsQueryable();
+
+            // Build date range based on provided year/month/day for CreatedAt
+            DateTime? start = null;
+            DateTime? end = null;
+
+            if (year.HasValue)
+            {
+                if (month.HasValue)
+                {
+                    if (day.HasValue)
+                    {
+                        start = new DateTime(year.Value, month.Value, day.Value, 0, 0, 0, DateTimeKind.Utc);
+                        end = start.Value.AddDays(1);
+                    }
+                    else
+                    {
+                        start = new DateTime(year.Value, month.Value, 1, 0, 0, 0, DateTimeKind.Utc);
+                        end = start.Value.AddMonths(1);
+                    }
+                }
+                else
+                {
+                    start = new DateTime(year.Value, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    end = start.Value.AddYears(1);
+                }
+            }
+
+            if (start.HasValue && end.HasValue)
+            {
+                query = query.Where(o => o.CreatedAt >= start.Value && o.CreatedAt < end.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(o => o.CreatedAt)
+                .Skip(pagination.Skip)
+                .Take(pagination.Take)
+                .ToListAsync();
+
+            return new PaginatedResult<Order>(items, totalCount, pagination.PageNumber, pagination.PageSize);
+        }
+
+        public async Task<decimal> GetTotalRevenueAsync(DateTime? start, DateTime? end)
+        {
+            var query = _context.Orders.Where(o => o.Status == OrderStatus.Paid);
+
+            if (start.HasValue)
+                query = query.Where(o => o.CreatedAt >= start.Value);
+            if (end.HasValue)
+                query = query.Where(o => o.CreatedAt < end.Value);
+
+            return await query.SumAsync(o => o.Amount);
+        }
+
+        public async Task<IEnumerable<RevenueGroupInt>> GetRevenueByYearAsync()
+        {
+            return await _context.Orders
+                .Where(o => o.Status == OrderStatus.Paid)
+                .GroupBy(o => o.CreatedAt.Year)
+                .Select(g => new RevenueGroupInt { Key = g.Key, Total = g.Sum(o => o.Amount) })
+                .OrderBy(x => x.Key)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<RevenueGroupInt>> GetRevenueByMonthAsync(int year)
+        {
+            return await _context.Orders
+                .Where(o => o.Status == OrderStatus.Paid && o.CreatedAt.Year == year)
+                .GroupBy(o => o.CreatedAt.Month)
+                .Select(g => new RevenueGroupInt { Key = g.Key, Total = g.Sum(o => o.Amount) })
+                .OrderBy(x => x.Key)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<RevenueGroupInt>> GetRevenueByDayAsync(int year, int month)
+        {
+            return await _context.Orders
+                .Where(o => o.Status == OrderStatus.Paid && o.CreatedAt.Year == year && o.CreatedAt.Month == month)
+                .GroupBy(o => o.CreatedAt.Day)
+                .Select(g => new RevenueGroupInt { Key = g.Key, Total = g.Sum(o => o.Amount) })
+                .OrderBy(x => x.Key)
+                .ToListAsync();
         }
     }
 }

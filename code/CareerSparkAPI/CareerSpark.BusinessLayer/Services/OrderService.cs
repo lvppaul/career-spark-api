@@ -7,6 +7,7 @@ using CareerSpark.DataAccessLayer.Enums;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using CareerSpark.DataAccessLayer.Helper;
 
 namespace CareerSpark.BusinessLayer.Services
 {
@@ -335,6 +336,43 @@ namespace CareerSpark.BusinessLayer.Services
                 _logger.LogError(ex, "Error cancelling expired orders");
                 return false;
             }
+        }
+
+        public async Task<PaginatedOrderResponse> GetOrdersPagedAsync(int pageNumber, int pageSize, int? year, int? month, int? day)
+        {
+            var pagination = new Pagination(pageNumber, pageSize);
+            var paged = await _unitOfWork.OrderRepository.GetOrdersPagedAsync(pagination, year, month, day);
+
+            return new PaginatedOrderResponse
+            {
+                Items = OrderMapper.ToResponseList(paged.Items),
+                TotalCount = paged.TotalCount,
+                PageNumber = paged.PageNumber,
+                PageSize = paged.PageSize
+            };
+        }
+
+        public async Task<decimal> GetTotalRevenueAsync(DateTime? start, DateTime? end)
+        {
+            return await _unitOfWork.OrderRepository.GetTotalRevenueAsync(start, end);
+        }
+
+        public async Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByYearAsync()
+        {
+            var data = await _unitOfWork.OrderRepository.GetRevenueByYearAsync();
+            return data.Select(x => new KeyValuePair<int, decimal>(x.Key, x.Total));
+        }
+
+        public async Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByMonthAsync(int year)
+        {
+            var data = await _unitOfWork.OrderRepository.GetRevenueByMonthAsync(year);
+            return data.Select(x => new KeyValuePair<int, decimal>(x.Key, x.Total));
+        }
+
+        public async Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByDayAsync(int year, int month)
+        {
+            var data = await _unitOfWork.OrderRepository.GetRevenueByDayAsync(year, month);
+            return data.Select(x => new KeyValuePair<int, decimal>(x.Key, x.Total));
         }
     }
 }
