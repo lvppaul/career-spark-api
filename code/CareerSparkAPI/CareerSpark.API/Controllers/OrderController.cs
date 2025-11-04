@@ -3,6 +3,7 @@ using CareerSpark.BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using CareerSpark.BusinessLayer.DTOs.Response;
 
 namespace CareerSpark.API.Controllers
 {
@@ -438,6 +439,62 @@ namespace CareerSpark.API.Controllers
                 {
                     success = false,
                     message = "Something went wrong when retrieving revenue by day",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpGet("top-spenders/current-month")]
+        public async Task<IActionResult> GetTopSpendersThisMonth([FromQuery] int top = 10)
+        {
+            try
+            {
+                if (top <= 0) top = 10;
+                var data = await _orderService.GetTopSpendersThisMonthAsync(top);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Top spenders for current month retrieved successfully",
+                    data,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving top spenders",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpGet("top-spenders/last-7-days")]
+        public async Task<IActionResult> GetTopSpendersLast7Days([FromQuery] int top = 10)
+        {
+            try
+            {
+                if (top <= 0) top = 10;
+                var data = await _orderService.GetTopSpendersLast7DaysAsync(top);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Top spenders for last 7 days retrieved successfully",
+                    data,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when retrieving top spenders",
                     error = ex.Message,
                     timestamp = DateTime.UtcNow
                 });

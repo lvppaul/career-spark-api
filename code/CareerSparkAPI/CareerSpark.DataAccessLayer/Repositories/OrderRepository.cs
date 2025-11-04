@@ -174,5 +174,23 @@ namespace CareerSpark.DataAccessLayer.Repositories
                 .OrderBy(x => x.Key)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<TopSpender>> GetTopSpendersAsync(DateTime startInclusive, DateTime endExclusive, int top)
+        {
+            return await _context.Orders
+                .Include(o => o.User)
+                .Where(o => o.Status == OrderStatus.Paid && o.PaidAt >= startInclusive && o.PaidAt < endExclusive)
+                .GroupBy(o => new { o.UserId, o.User.Name, o.User.Email })
+                .Select(g => new TopSpender
+                {
+                    UserId = g.Key.UserId,
+                    UserName = g.Key.Name,
+                    Email = g.Key.Email ?? string.Empty,
+                    Total = g.Sum(o => o.Amount)
+                })
+                .OrderByDescending(x => x.Total)
+                .Take(top)
+                .ToListAsync();
+        }
     }
 }
