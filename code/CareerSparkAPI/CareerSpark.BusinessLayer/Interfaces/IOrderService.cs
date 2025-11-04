@@ -18,6 +18,10 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByYearAsync();
         Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByMonthAsync(int year);
         Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByDayAsync(int year, int month);
+
+        // Top spenders
+        Task<IEnumerable<TopSpenderResponse>> GetTopSpendersThisMonthAsync(int top = 10);
+        Task<IEnumerable<TopSpenderResponse>> GetTopSpendersLast7DaysAsync(int top = 10);
     }
 
     public class PaginatedOrderResponse

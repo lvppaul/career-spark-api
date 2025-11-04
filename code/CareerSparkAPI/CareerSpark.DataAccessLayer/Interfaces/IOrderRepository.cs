@@ -17,5 +17,7 @@ namespace CareerSpark.DataAccessLayer.Interfaces
         Task<IEnumerable<RevenueGroupInt>> GetRevenueByYearAsync();
         Task<IEnumerable<RevenueGroupInt>> GetRevenueByMonthAsync(int year);
         Task<IEnumerable<RevenueGroupInt>> GetRevenueByDayAsync(int year, int month);
+        // Top spenders within a period (by Paid orders)
+        Task<IEnumerable<TopSpender>> GetTopSpendersAsync(DateTime startInclusive, DateTime endExclusive, int top);
     }
 }
