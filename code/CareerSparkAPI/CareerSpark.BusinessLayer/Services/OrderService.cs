@@ -374,5 +374,35 @@ namespace CareerSpark.BusinessLayer.Services
             var data = await _unitOfWork.OrderRepository.GetRevenueByDayAsync(year, month);
             return data.Select(x => new KeyValuePair<int, decimal>(x.Key, x.Total));
         }
+
+        public async Task<IEnumerable<TopSpenderResponse>> GetTopSpendersThisMonthAsync(int top = 10)
+        {
+            var now = DateTime.UtcNow;
+            var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var endOfMonthExclusive = startOfMonth.AddMonths(1);
+
+            var data = await _unitOfWork.OrderRepository.GetTopSpendersAsync(startOfMonth, endOfMonthExclusive, top);
+            return data.Select(x => new TopSpenderResponse
+            {
+                UserId = x.UserId,
+                UserName = x.UserName,
+                Email = x.Email,
+                Total = x.Total
+            });
+        }
+
+        public async Task<IEnumerable<TopSpenderResponse>> GetTopSpendersLast7DaysAsync(int top = 10)
+        {
+            var end = DateTime.UtcNow;
+            var start = end.AddDays(-7);
+            var data = await _unitOfWork.OrderRepository.GetTopSpendersAsync(start, end, top);
+            return data.Select(x => new TopSpenderResponse
+            {
+                UserId = x.UserId,
+                UserName = x.UserName,
+                Email = x.Email,
+                Total = x.Total
+            });
+        }
     }
 }
