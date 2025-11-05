@@ -7,6 +7,7 @@ using CareerSpark.DataAccessLayer.Enums;
 using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using CareerSpark.DataAccessLayer.Helper;
 
 namespace CareerSpark.BusinessLayer.Services
 {
@@ -335,6 +336,73 @@ namespace CareerSpark.BusinessLayer.Services
                 _logger.LogError(ex, "Error cancelling expired orders");
                 return false;
             }
+        }
+
+        public async Task<PaginatedOrderResponse> GetOrdersPagedAsync(int pageNumber, int pageSize, int? year, int? month, int? day)
+        {
+            var pagination = new Pagination(pageNumber, pageSize);
+            var paged = await _unitOfWork.OrderRepository.GetOrdersPagedAsync(pagination, year, month, day);
+
+            return new PaginatedOrderResponse
+            {
+                Items = OrderMapper.ToResponseList(paged.Items),
+                TotalCount = paged.TotalCount,
+                PageNumber = paged.PageNumber,
+                PageSize = paged.PageSize
+            };
+        }
+
+        public async Task<decimal> GetTotalRevenueAsync(DateTime? start, DateTime? end)
+        {
+            return await _unitOfWork.OrderRepository.GetTotalRevenueAsync(start, end);
+        }
+
+        public async Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByYearAsync()
+        {
+            var data = await _unitOfWork.OrderRepository.GetRevenueByYearAsync();
+            return data.Select(x => new KeyValuePair<int, decimal>(x.Key, x.Total));
+        }
+
+        public async Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByMonthAsync(int year)
+        {
+            var data = await _unitOfWork.OrderRepository.GetRevenueByMonthAsync(year);
+            return data.Select(x => new KeyValuePair<int, decimal>(x.Key, x.Total));
+        }
+
+        public async Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByDayAsync(int year, int month)
+        {
+            var data = await _unitOfWork.OrderRepository.GetRevenueByDayAsync(year, month);
+            return data.Select(x => new KeyValuePair<int, decimal>(x.Key, x.Total));
+        }
+
+        public async Task<IEnumerable<TopSpenderResponse>> GetTopSpendersThisMonthAsync(int top = 10)
+        {
+            var now = DateTime.UtcNow;
+            var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var endOfMonthExclusive = startOfMonth.AddMonths(1);
+
+            var data = await _unitOfWork.OrderRepository.GetTopSpendersAsync(startOfMonth, endOfMonthExclusive, top);
+            return data.Select(x => new TopSpenderResponse
+            {
+                UserId = x.UserId,
+                UserName = x.UserName,
+                Email = x.Email,
+                Total = x.Total
+            });
+        }
+
+        public async Task<IEnumerable<TopSpenderResponse>> GetTopSpendersLast7DaysAsync(int top = 10)
+        {
+            var end = DateTime.UtcNow;
+            var start = end.AddDays(-7);
+            var data = await _unitOfWork.OrderRepository.GetTopSpendersAsync(start, end, top);
+            return data.Select(x => new TopSpenderResponse
+            {
+                UserId = x.UserId,
+                UserName = x.UserName,
+                Email = x.Email,
+                Total = x.Total
+            });
         }
     }
 }

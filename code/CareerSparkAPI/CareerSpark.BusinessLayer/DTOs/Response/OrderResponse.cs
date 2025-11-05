@@ -1,3 +1,4 @@
+using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Enums;
 using System.Text.Json.Serialization;
 
@@ -29,5 +30,16 @@ namespace CareerSpark.BusinessLayer.DTOs.Response
         public string Message { get; set; } = string.Empty;
         public OrderResponse? Order { get; set; }
         public string? PaymentUrl { get; set; }
+    }
+
+    public class OrdersPagedResponse
+    {
+        public IEnumerable<OrderResponse> Items { get; set; } = Enumerable.Empty<OrderResponse>();
+        public int TotalCount { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+        public bool HasPrevious => PageNumber > 1;
+        public bool HasNext => PageNumber < TotalPages;
     }
 }
