@@ -18,7 +18,7 @@ namespace CareerSpark.API.Controllers
             _blogService = blogService;
         }
 
-        [Authorize]
+
         [HttpGet("PublishedPagination")]
         public async Task<IActionResult> GetAllBlogsWithPagination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -328,7 +328,7 @@ namespace CareerSpark.API.Controllers
             }
         }
 
-        [Authorize]
+       
         [HttpGet("BlogUnpublishedPagination")]
         public async Task<IActionResult> GetAllUnpublishedBlogsWithPagination([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
