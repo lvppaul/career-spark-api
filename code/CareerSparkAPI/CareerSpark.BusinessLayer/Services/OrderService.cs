@@ -1,6 +1,7 @@
 using CareerSpark.BusinessLayer.DTOs.Request;
 using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.Interfaces;
+using CareerSpark.BusinessLayer.Libraries;
 using CareerSpark.BusinessLayer.Mappings;
 using CareerSpark.DataAccessLayer.Entities;
 using CareerSpark.DataAccessLayer.Enums;
@@ -8,6 +9,7 @@ using CareerSpark.DataAccessLayer.UnitOfWork;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using CareerSpark.DataAccessLayer.Helper;
+using System.Globalization;
 
 namespace CareerSpark.BusinessLayer.Services
 {
@@ -15,12 +17,18 @@ namespace CareerSpark.BusinessLayer.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPayOSService _payOSService;
+        private readonly IEmailService _emailService;
         private readonly ILogger<OrderService> _logger;
 
-        public OrderService(IUnitOfWork unitOfWork, IPayOSService payOSService, ILogger<OrderService> logger)
+        public OrderService(
+            IUnitOfWork unitOfWork, 
+            IPayOSService payOSService, 
+            IEmailService emailService,
+            ILogger<OrderService> logger)
         {
             _unitOfWork = unitOfWork;
             _payOSService = payOSService;
+            _emailService = emailService;
             _logger = logger;
         }
 
@@ -403,6 +411,60 @@ namespace CareerSpark.BusinessLayer.Services
                 Email = x.Email,
                 Total = x.Total
             });
+        }
+
+        public async Task<bool> SendOrderSuccessEmailAsync(int orderId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var order = await _unitOfWork.OrderRepository.GetOrderByIdWithDetailsAsync(orderId);
+                if (order == null)
+                {
+                    _logger.LogWarning("Order not found for ID: {OrderId}", orderId);
+                    return false;
+                }
+
+                if (order.Status != OrderStatus.Paid)
+                {
+                    _logger.LogWarning("Order {OrderId} is not paid. Current status: {Status}", orderId, order.Status);
+                    return false;
+                }
+
+                var user = await _unitOfWork.UserRepository.GetByIdAsync(order.UserId);
+                if (user == null || string.IsNullOrEmpty(user.Email))
+                {
+                    _logger.LogWarning("User or user email not found for order {OrderId}", orderId);
+                    return false;
+                }
+
+                // Format amount with Vietnamese currency
+                var formattedAmount = order.Amount.ToString("N0", new CultureInfo("vi-VN")) + " VNĐ";
+                var orderDate = order.PaidAt?.ToString("dd/MM/yyyy HH:mm:ss") ?? order.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss");
+                var productName = order.SubscriptionPlan?.Name ?? "Gói đăng ký";
+
+                var emailBody = EmailOrderSuccessTemplate.OrderSuccessTemplate(
+                    userName: user.Name,
+                    orderId: order.Id.ToString(),
+                    amount: formattedAmount,
+                    orderDate: orderDate,
+                    productName: productName
+                );
+
+                await _emailService.SendEmailAsync(new EmailRequest
+                {
+                    To = user.Email,
+                    Subject = "Xác nhận thanh toán thành công - CareerSpark",
+                    Body = emailBody
+                }, cancellationToken);
+
+                _logger.LogInformation("Order success email sent to {Email} for order {OrderId}", user.Email, orderId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending order success email for order {OrderId}", orderId);
+                return false;
+            }
         }
     }
 }

@@ -13,6 +13,9 @@ namespace CareerSpark.BusinessLayer.Interfaces
         Task<bool> CancelExpiredOrdersAsync();
         Task<PaginatedOrderResponse> GetOrdersPagedAsync(int pageNumber, int pageSize, int? year, int? month, int? day);
 
+        // Email
+        Task<bool> SendOrderSuccessEmailAsync(int orderId, CancellationToken cancellationToken = default);
+
         // Revenue
         Task<decimal> GetTotalRevenueAsync(DateTime? start, DateTime? end);
         Task<IEnumerable<KeyValuePair<int, decimal>>> GetRevenueByYearAsync();
