@@ -227,7 +227,7 @@ namespace CareerSpark.API.Controllers
                 });
             }
         }
-        [Authorize]
+      
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBlogById(int id)
         {
