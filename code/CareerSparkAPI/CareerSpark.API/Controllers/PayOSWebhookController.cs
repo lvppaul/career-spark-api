@@ -66,6 +66,23 @@ namespace CareerSpark.API.Controllers
                     return Ok(new { code = "01", message = "Process failed" });
                 }
 
+                // 📧 Gửi email xác nhận thanh toán thành công
+                if (paymentResponse.Success && int.TryParse(orderIdString, out int orderId))
+                {
+                    // Fire and forget - không chặn response webhook
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _orderService.SendOrderSuccessEmailAsync(orderId);
+                        }
+                        catch (Exception emailEx)
+                        {
+                            _logger.LogError(emailEx, "Error sending order success email for order {OrderId}", orderId);
+                        }
+                    });
+                }
+
                 _logger.LogInformation("✅ Webhook processed successfully for order {OrderCode}", data.orderCode);
                 return Ok(new { code = "00", message = "success" });
             }
