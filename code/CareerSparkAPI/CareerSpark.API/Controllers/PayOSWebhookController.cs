@@ -89,6 +89,7 @@ namespace CareerSpark.API.Controllers
                 //}
 
                 // 📧 Gửi email xác nhận thanh toán thành công NGAY LẬP TỨC
+                _logger.LogInformation("Beffore Starting to send order success email for order ");
                 var orderId = int.Parse(orderIdString);
                 _logger.LogInformation("📧 Starting to send order success email for order {OrderId}", orderId);
 
