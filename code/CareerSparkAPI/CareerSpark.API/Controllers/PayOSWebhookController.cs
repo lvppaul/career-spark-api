@@ -1,5 +1,4 @@
-﻿using CareerSpark.API.Extensions;
-using CareerSpark.BusinessLayer.DTOs.Response;
+﻿using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.Interfaces;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
@@ -73,20 +72,47 @@ namespace CareerSpark.API.Controllers
                     return StatusCode(500, new { code = "01", message = "Process failed" });
                 }
 
-                // 📧 Enqueue email job with Hangfire using extension method
+                //// 📧 Enqueue email job with Hangfire using extension method
+                //if (paymentResponse.Success && int.TryParse(orderIdString, out int orderId))
+                //{
+                //    _logger.LogInformation("📧 Enqueuing order success email job for order {OrderId}", orderId);
+
+                //    // Sử dụng extension method để enqueue job
+                //    var jobId = _backgroundJobClient.EnqueueOrderSuccessEmail(orderId);
+
+                //    _logger.LogInformation("🔥 [Hangfire] Email job enqueued with ID: {JobId} for order {OrderId}", jobId, orderId);
+                //}
+                //else
+                //{
+                //    _logger.LogWarning("⚠️ Email not sent - Payment not successful or invalid order ID. Success: {Success}, OrderId: {OrderId}",
+                //        paymentResponse.Success, orderIdString);
+                //}
+
+                // 📧 Gửi email xác nhận thanh toán thành công NGAY LẬP TỨC
                 if (paymentResponse.Success && int.TryParse(orderIdString, out int orderId))
                 {
-                    _logger.LogInformation("📧 Enqueuing order success email job for order {OrderId}", orderId);
+                    _logger.LogInformation("📧 Starting to send order success email for order {OrderId}", orderId);
 
-                    // Sử dụng extension method để enqueue job
-                    var jobId = _backgroundJobClient.EnqueueOrderSuccessEmail(orderId);
-
-                    _logger.LogInformation("🔥 [Hangfire] Email job enqueued with ID: {JobId} for order {OrderId}", jobId, orderId);
+                    try
+                    {
+                        var emailSent = await _orderService.SendOrderSuccessEmailAsync(orderId);
+                        if (emailSent)
+                        {
+                            _logger.LogInformation("✅ Order success email sent successfully for order {OrderId}", orderId);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("⚠️ Failed to send order success email for order {OrderId}", orderId);
+                        }
+                    }
+                    catch (Exception emailEx)
+                    {
+                        _logger.LogError(emailEx, "❌ Error sending order success email for order {OrderId}", orderId);
+                    }
                 }
                 else
                 {
-                    _logger.LogWarning("⚠️ Email not sent - Payment not successful or invalid order ID. Success: {Success}, OrderId: {OrderId}",
-                        paymentResponse.Success, orderIdString);
+                    _logger.LogWarning("⚠️ Email not sent - Payment not successful or invalid order ID");
                 }
 
                 _logger.LogInformation("✅ Webhook processed successfully for order {OrderCode}", data.orderCode);
