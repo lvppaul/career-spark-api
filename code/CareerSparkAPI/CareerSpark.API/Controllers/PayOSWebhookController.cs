@@ -77,16 +77,33 @@ namespace CareerSpark.API.Controllers
                 if (paymentResponse.Success && int.TryParse(orderIdString, out int orderId))
                 {
                     _logger.LogInformation("📧 Enqueuing order success email job for order {OrderId}", orderId);
-                    
+
                     // Sử dụng extension method để enqueue job
                     var jobId = _backgroundJobClient.EnqueueOrderSuccessEmail(orderId);
-                    
+
                     _logger.LogInformation("🔥 [Hangfire] Email job enqueued with ID: {JobId} for order {OrderId}", jobId, orderId);
                 }
                 else
                 {
-                    _logger.LogWarning("⚠️ Email not sent - Payment not successful or invalid order ID. Success: {Success}, OrderId: {OrderId}", 
+                    _logger.LogWarning("⚠️ Email not sent - Payment not successful or invalid order ID. Success: {Success}, OrderId: {OrderId}",
                         paymentResponse.Success, orderIdString);
+                }
+
+                // 📧 Gửi email xác nhận thanh toán thành công
+                if (paymentResponse.Success && int.TryParse(orderIdString, out int orderIdnew))
+                {
+                    // Fire and forget - không chặn response webhook
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _orderService.SendOrderSuccessEmailAsync(orderIdnew);
+                        }
+                        catch (Exception emailEx)
+                        {
+                            _logger.LogError(emailEx, "Error sending order success email for order {OrderId}", orderIdnew);
+                        }
+                    });
                 }
 
                 _logger.LogInformation("✅ Webhook processed successfully for order {OrderCode}", data.orderCode);
