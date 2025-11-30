@@ -1,5 +1,7 @@
-﻿using CareerSpark.BusinessLayer.DTOs.Response;
+﻿using CareerSpark.API.Extensions;
+using CareerSpark.BusinessLayer.DTOs.Response;
 using CareerSpark.BusinessLayer.Interfaces;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Net.payOS;
@@ -18,13 +20,15 @@ namespace CareerSpark.API.Controllers
         private readonly IOrderService _orderService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<PaymentController> _logger;
+        private readonly IBackgroundJobClient _backgroundJobClient;
 
-        public PaymentController(IOrderService orderService, IConfiguration configuration, ILogger<PaymentController> logger)
+        public PaymentController(IOrderService orderService, IConfiguration configuration, ILogger<PaymentController> logger, IBackgroundJobClient backgroundJobClient)
         {
 
             _orderService = orderService;
             _configuration = configuration;
             _logger = logger;
+            _backgroundJobClient = backgroundJobClient;
             var clientId = _configuration["PayOS:ClientId"] ?? "";
             var apiKey = _configuration["PayOS:ApiKey"] ?? "";
             var checksumKey = _configuration["PayOS:ChecksumKey"] ?? "";
@@ -173,7 +177,23 @@ namespace CareerSpark.API.Controllers
                 if (!processed)
                 {
                     _logger.LogWarning(" Failed to process webhook for order {OrderCode}", data.orderCode);
-                    return Ok(new { code = "01", message = "Process failed" });
+                    return StatusCode(500, new { code = "01", message = "Process failed" });
+                }
+
+                //📧 Enqueue email job with Hangfire using extension method
+                if (paymentResponse.Success && int.TryParse(orderIdString, out int orderId))
+                {
+                    _logger.LogInformation("📧 Enqueuing order success email job for order {OrderId}", orderId);
+
+                    // Sử dụng extension method để enqueue job
+                    var jobId = _backgroundJobClient.EnqueueOrderSuccessEmail(orderId);
+
+                    _logger.LogInformation("🔥 [Hangfire] Email job enqueued with ID: {JobId} for order {OrderId}", jobId, orderId);
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ Email not sent - Payment not successful or invalid order ID. Success: {Success}, OrderId: {OrderId}",
+                        paymentResponse.Success, orderIdString);
                 }
 
                 _logger.LogInformation(" Webhook processed successfully for order {OrderCode}", data.orderCode);
