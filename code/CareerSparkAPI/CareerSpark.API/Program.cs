@@ -151,6 +151,7 @@ namespace CareerSpark.API
             builder.Services.AddHangfire(config =>
             {
                 config.UsePostgreSqlStorage(options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+
                 // Configure automatic retry policy for failed jobs
                 config.UseFilter(new AutomaticRetryAttribute
                 {
@@ -176,13 +177,14 @@ namespace CareerSpark.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
 
-                app.UseHangfireDashboard(options: new DashboardOptions
-                {
-                    Authorization = [],
-                    DarkModeEnabled = true
-                }
-                );
+
             }
+            app.UseHangfireDashboard(options: new DashboardOptions
+            {
+                Authorization = [],
+                DarkModeEnabled = true
+            }
+);
             //using (var scope = app.Services.CreateScope())
             //{
             //    var db = scope.ServiceProvider.GetRequiredService<CareerSparkDbContext>();
