@@ -89,31 +89,26 @@ namespace CareerSpark.API.Controllers
                 //}
 
                 // 📧 Gửi email xác nhận thanh toán thành công NGAY LẬP TỨC
-                if (paymentResponse.Success && int.TryParse(orderIdString, out int orderId))
-                {
-                    _logger.LogInformation("📧 Starting to send order success email for order {OrderId}", orderId);
+                var orderId = int.Parse(orderIdString);
+                _logger.LogInformation("📧 Starting to send order success email for order {OrderId}", orderId);
 
-                    try
-                    {
-                        var emailSent = await _orderService.SendOrderSuccessEmailAsync(orderId);
-                        if (emailSent)
-                        {
-                            _logger.LogInformation("✅ Order success email sent successfully for order {OrderId}", orderId);
-                        }
-                        else
-                        {
-                            _logger.LogWarning("⚠️ Failed to send order success email for order {OrderId}", orderId);
-                        }
-                    }
-                    catch (Exception emailEx)
-                    {
-                        _logger.LogError(emailEx, "❌ Error sending order success email for order {OrderId}", orderId);
-                    }
-                }
-                else
+                try
                 {
-                    _logger.LogWarning("⚠️ Email not sent - Payment not successful or invalid order ID");
+                    var emailSent = await _orderService.SendOrderSuccessEmailAsync(orderId);
+                    if (emailSent)
+                    {
+                        _logger.LogInformation("✅ Order success email sent successfully for order {OrderId}", orderId);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("⚠️ Failed to send order success email for order {OrderId}", orderId);
+                    }
                 }
+                catch (Exception emailEx)
+                {
+                    _logger.LogError(emailEx, "❌ Error sending order success email for order {OrderId}", orderId);
+                }
+
 
                 _logger.LogInformation("✅ Webhook processed successfully for order {OrderCode}", data.orderCode);
                 return Ok(new { code = "00", message = "success" });
