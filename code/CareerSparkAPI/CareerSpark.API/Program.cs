@@ -162,8 +162,10 @@ namespace CareerSpark.API
             // Kiểm tra các job scheduled (đã lên lịch) mỗi 1 giây.
             builder.Services.AddHangfireServer(options =>
             {
-                options.SchedulePollingInterval = TimeSpan.FromSeconds(1);
+                options.SchedulePollingInterval = TimeSpan.FromSeconds(15);
                 options.WorkerCount = 5; // Number of concurrent job executions
+                options.HeartbeatInterval = TimeSpan.FromSeconds(10);
+                options.ServerTimeout = TimeSpan.FromSeconds(30);
             });
 
             var app = builder.Build();
