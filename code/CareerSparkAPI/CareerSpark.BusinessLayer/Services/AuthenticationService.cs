@@ -889,7 +889,7 @@ namespace CareerSpark.BusinessLayer.Services
 
             try
             {
-                var decodedToken = HttpUtility.UrlDecode(request.Token);
+                var decodedToken = request.Token;
                 var (userId, securityStamp) = await ValidatePasswordResetToken(decodedToken);
 
                 if (userId != user.Id)
@@ -955,13 +955,13 @@ namespace CareerSpark.BusinessLayer.Services
                     Message = "Đặt lại mật khẩu thành công"
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
                 return new AuthenticationResponse
                 {
                     Success = false,
-                    Message = "Token không hợp lệ hoặc đã hết hạn"
+                    Message = $"Token không hợp lệ hoặc đã hết hạn: {ex.Message}"
                 };
             }
         }
