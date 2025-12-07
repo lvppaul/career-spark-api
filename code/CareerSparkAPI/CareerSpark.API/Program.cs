@@ -3,6 +3,8 @@ using CareerSpark.BusinessLayer.Interfaces;
 using CareerSpark.BusinessLayer.Services;
 using CareerSpark.DataAccessLayer.Context;
 using CareerSpark.DataAccessLayer.UnitOfWork;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -105,6 +107,8 @@ namespace CareerSpark.API
             builder.Services.AddScoped<INewsService, NewsService>();
             //   builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IEmailService, ResendEmailService>();
+            // Add Email Background Job Service for Hangfire
+            builder.Services.AddScoped<IEmailBackgroundJobService, EmailBackgroundJobService>();
 
             builder.Services.AddCors(options =>
             {
@@ -144,6 +148,27 @@ namespace CareerSpark.API
                 o.ApiToken = builder.Configuration["Resend:ApiKey"]!;
             });
             builder.Services.AddTransient<IResend, ResendClient>();
+            builder.Services.AddHangfire(config =>
+            {
+                config.UsePostgreSqlStorage(options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+                // Configure automatic retry policy for failed jobs
+                config.UseFilter(new AutomaticRetryAttribute
+                {
+                    Attempts = 3, // Retry up to 3 times
+                    DelaysInSeconds = new[] { 60, 300, 900 }, // 1min, 5min, 15min
+                    OnAttemptsExceeded = AttemptsExceededAction.Delete
+                });
+            });
+            // Kiểm tra các job scheduled (đã lên lịch) mỗi 1 giây.
+            builder.Services.AddHangfireServer(options =>
+            {
+                options.SchedulePollingInterval = TimeSpan.FromSeconds(15);
+                options.WorkerCount = 5; // Number of concurrent job executions
+                options.HeartbeatInterval = TimeSpan.FromSeconds(10);
+                options.ServerTimeout = TimeSpan.FromSeconds(30);
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -151,7 +176,15 @@ namespace CareerSpark.API
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+
+
             }
+            app.UseHangfireDashboard(options: new DashboardOptions
+            {
+                Authorization = [],
+                DarkModeEnabled = true
+            }
+);
             //using (var scope = app.Services.CreateScope())
             //{
             //    var db = scope.ServiceProvider.GetRequiredService<CareerSparkDbContext>();

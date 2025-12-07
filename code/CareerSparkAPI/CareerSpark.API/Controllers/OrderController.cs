@@ -3,7 +3,6 @@ using CareerSpark.BusinessLayer.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using CareerSpark.BusinessLayer.DTOs.Response;
 
 namespace CareerSpark.API.Controllers
 {
@@ -495,6 +494,44 @@ namespace CareerSpark.API.Controllers
                 {
                     success = false,
                     message = "Something went wrong when retrieving top spenders",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpPost("send-success-mail")]
+        public async Task<IActionResult> SendMailSuccessOrders(int orderId)
+        {
+            try
+            {
+                var result = await _orderService.SendOrderSuccessEmailAsync(orderId);
+
+                if (result)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Send mail orders  successfully",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+                else
+                {
+                    return StatusCode(500, new
+                    {
+                        success = false,
+                        message = "Failed to send mail orders",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Something went wrong when cancelling expired orders",
                     error = ex.Message,
                     timestamp = DateTime.UtcNow
                 });
