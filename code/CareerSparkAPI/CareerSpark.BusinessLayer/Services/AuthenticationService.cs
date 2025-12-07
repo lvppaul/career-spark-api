@@ -929,14 +929,14 @@ namespace CareerSpark.BusinessLayer.Services
                 }
 
                 //Validate old and new password
-                if (BCrypt.Net.BCrypt.Verify(request.NewPassword, user.Password))
-                {
-                    return new AuthenticationResponse
-                    {
-                        Success = false,
-                        Message = "Mật khẩu mới không được trùng với mật khẩu cũ"
-                    };
-                }
+                //if (BCrypt.Net.BCrypt.Verify(request.NewPassword, user.Password))
+                //{
+                //    return new AuthenticationResponse
+                //    {
+                //        Success = false,
+                //        Message = "Mật khẩu mới không được trùng với mật khẩu cũ"
+                //    };
+                //}
 
                 await _unitOfWork.BeginTransactionAsync();
 
