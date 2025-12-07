@@ -12,6 +12,7 @@ namespace CareerSpark.BusinessLayer.Mappings
                 Id = order.Id,
                 UserId = order.UserId,
                 UserName = order.User?.Name ?? string.Empty,
+                Email = order.User?.Email ?? string.Empty,
                 SubscriptionPlanId = order.SubscriptionPlanId,
                 SubscriptionPlanName = order.SubscriptionPlan?.Name ?? string.Empty,
                 Amount = order.Amount,
